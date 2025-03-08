@@ -1,26 +1,139 @@
-/* style.css */
+/* Updated style.css for a modern, easy-on-the-eyes interface */
+
+body {
+  background-color: #f2f4f8;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: #333;
+  margin: 0;
+  padding: 20px;
+}
+
 table {
   border-collapse: collapse;
   width: 100%;
+  background: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
 th, td {
-  border: 1px solid #ccc;
-  padding: 8px;
+  border: 1px solid #e0e6ed;
+  padding: 12px 15px;
   text-align: left;
+  font-size: 14px;
+}
+
+th {
+  background-color: #e0e7ef;
+  font-weight: bold;
+}
+
+tr {
+  transition: background-color 0.3s ease;
+}
+
+tr:hover {
+  background-color: #f9f9f9;
 }
 
 .drag-handle {
   cursor: move;
   width: 30px;
   text-align: center;
+  color: #888;
+}
+
+.drag-handle:hover {
+  color: #555;
 }
 
 .drag-over {
-  background: #f0f0f0;
+  background-color: #dce4f1 !important;
 }
 
-/* New: Modified row color coding */
 .modified {
-  background-color: #ffffcc;  /* light yellow background */
+  background-color: #fff3cd !important;
+}
+
+button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  margin: 5px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+input[type="text"],
+select {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-right: 5px;
+}
+
+/* Modal styles */
+.modal {
+  display: none; 
+  position: fixed; 
+  z-index: 1000; 
+  left: 0;
+  top: 0;
+  width: 100%; 
+  height: 100%; 
+  overflow: auto; 
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+  background-color: #ffffff;
+  margin: 10% auto; 
+  padding: 20px;
+  border: 1px solid #888;
+  width: 300px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+  color: #333;
+  text-decoration: none;
+}
+
+#columnPrefsList {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+
+.pref-item {
+  border: 1px solid #e0e6ed;
+  padding: 8px;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  background: #f9f9f9;
+  border-radius: 4px;
+  cursor: move;
+}
+
+.pref-item span {
+  margin-left: 8px;
 }

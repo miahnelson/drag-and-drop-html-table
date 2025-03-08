@@ -2,36 +2,63 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Editable & Draggable Table</title>
+  <title>Editable, Draggable & Bulk Editable Table</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <div id="tableControls" style="text-align: right; margin-bottom: 10px;">
-    <button id="saveBtn">Save</button>
-    <button id="cancelBtn">Cancel</button>
+  <!-- Top controls: Save/Cancel, Bulk Edit, and a gear icon for column preferences -->
+  <div id="tableControls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+    <div>
+      <button id="saveBtn">Save</button>
+      <button id="cancelBtn">Cancel</button>
+    </div>
+    <div>
+      <button id="columnPrefsBtn" title="Column Preferences">⚙️ Columns</button>
+    </div>
   </div>
+
+  <div id="bulkEditControls" style="margin-bottom: 10px;">
+    <label for="bulkColumn">Bulk Edit Column:</label>
+    <select id="bulkColumn">
+      <!-- Do not include "Index" in bulk edit -->
+      <option value="Name">Name</option>
+      <option value="Email">Email</option>
+      <option value="Address">Address</option>
+      <option value="City">City</option>
+      <option value="State">State</option>
+      <option value="Zip">Zip</option>
+      <option value="Country">Country</option>
+      <option value="Phone">Phone</option>
+      <option value="Company">Company</option>
+      <option value="Position">Position</option>
+      <option value="Notes">Notes</option>
+    </select>
+    <label for="bulkValue">Value:</label>
+    <input type="text" id="bulkValue" />
+    <button id="applyBulkEditBtn">Apply to Selected Rows</button>
+  </div>
+
   <table>
-    <thead>
-      <tr>
-        <th>Drag</th>
-        <th>Col1</th>
-        <th>Col2</th>
-        <th>Col3</th>
-        <th>Col4</th>
-        <th>Col5</th>
-        <th>Col6</th>
-        <th>Col7</th>
-        <th>Col8</th>
-        <th>Col9</th>
-        <th>Col10</th>
-        <th>Col11</th>
-        <th>Col12</th>
-      </tr>
-    </thead>
+    <!-- The header will be built dynamically based on column preferences -->
+    <thead id="tableHeader"></thead>
     <tbody id="tableBody">
       <!-- Table rows will be injected by script.js -->
     </tbody>
   </table>
+
+  <!-- Column Preferences Modal -->
+  <div id="columnPrefsModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Column Preferences</h2>
+      <ul id="columnPrefsList">
+        <!-- Modal list items will be injected by script.js -->
+      </ul>
+      <button id="savePrefsBtn">Save Preferences</button>
+      <button id="cancelPrefsBtn">Cancel</button>
+    </div>
+  </div>
+
   <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
