@@ -2,56 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Editable, Draggable & Bulk Editable Table</title>
+  <title>Draggable Table with Fallback Data</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-  <!-- Top Bar: Pagination, Search, Column Preferences, Save & Cancel -->
-  <div id="topBar" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-    
-    <!-- Left Section: Pagination + Search -->
-    <div id="leftSection" style="display: flex; align-items: center; gap: 12px;">
-      
-      <!-- Search Input -->
-      <label for="searchInput">Search:</label>
-      <input type="text" id="searchInput" placeholder="Type to filter..." aria-label="Search Table">
-
-      <!-- Rows Per Page Dropdown -->
-      <label for="rowsPerPageSelect">Rows per page:</label>
-      <select id="rowsPerPageSelect">
-        <option value="20" selected>20</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-        <option value="200">200</option>
-      </select>
-
-      <!-- Pagination Buttons -->
-      <button id="prevPageBtn" aria-label="Previous Page">Prev</button>
-      <span id="pageInfo"></span>
-      <button id="nextPageBtn" aria-label="Next Page">Next</button>
-    </div>
-
-    <!-- Right Section: Column Preferences, Save, Cancel -->
-    <div id="buttonsSection" style="display: flex; align-items: center; gap: 12px;">
-      <button id="columnPrefsBtn" title="Column Preferences">⚙️ Columns</button>
-      <button id="saveBtn">Save</button>
-      <button id="cancelBtn">Cancel</button>
-    </div>
-
+  <!-- Your top bar, search, pagination, etc. -->
+  <div id="topBar" style="margin-bottom: 10px;">
+    <!-- Example controls or placeholders -->
+    <input type="text" id="searchInput" placeholder="Search...">
+    <select id="rowsPerPageSelect">
+      <option value="20" selected>20</option>
+      <option value="50">50</option>
+      <option value="100">100</option>
+    </select>
+    <button id="prevPageBtn">Prev</button>
+    <span id="pageInfo"></span>
+    <button id="nextPageBtn">Next</button>
+    <button id="saveBtn">Save</button>
+    <button id="cancelBtn">Cancel</button>
+    <button id="columnPrefsBtn">Columns</button>
   </div>
 
-  <!-- Editable & Draggable Table -->
-  <table id="editableTable">
-    <thead id="tableHeader">
-      <tr>
-        <th><input type="checkbox" id="selectAllCheckbox" title="Select All"></th>
-        <!-- Dynamic Columns Will Be Injected Here -->
-      </tr>
-    </thead>
-    <tbody id="tableBody">
-      <!-- Table Data Will Be Dynamically Populated -->
-    </tbody>
+  <!-- Table -->
+  <table>
+    <thead id="tableHeader"></thead>
+    <tbody id="tableBody"></tbody>
   </table>
 
   <!-- Column Preferences Modal -->
@@ -59,18 +35,14 @@
     <div class="modal-content">
       <span class="close">&times;</span>
       <h2>Column Preferences</h2>
-      <ul id="columnPrefsList">
-        <!-- Dynamic Column Options -->
-      </ul>
+      <ul id="columnPrefsList"></ul>
       <button id="savePrefsBtn">Save Preferences</button>
       <button id="cancelPrefsBtn">Cancel</button>
     </div>
   </div>
 
-    <!-- Load script.js first -->
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-
-    <!-- Then load dragAndDrop.js so it can attach to the global scope -->
-    <script src="{{ url_for('static', filename='dragAndDrop.js') }}"></script>
+  <!-- Scripts -->
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script src="{{ url_for('static', filename='dragAndDrop.js') }}"></script>
 </body>
 </html>

@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // ------------------------------------------------
   // 1) STATE: Data, Pagination, Columns, Search
   // ------------------------------------------------
-  let allData = [];           // All rows loaded from /data
+  let allData = [];           // All rows loaded from /data or fallback
   let currentPage = 1;        // Current page
   let rowsPerPage = 20;       // Default rows per page
   let searchString = "";      // Current text filter
@@ -24,6 +24,178 @@ document.addEventListener('DOMContentLoaded', function() {
     { name: "Notes", visible: true }
   ];
   let columnsPref = loadColumnPreferences() || defaultColumns;
+
+  // Fallback data if /data is missing
+  const fallbackData = [
+    {
+      "Index": 1,
+      "Name": "John Doe",
+      "Email": "john.doe@example.com",
+      "Address": "123 Main St",
+      "City": "New York",
+      "State": "NY",
+      "Zip": "10001",
+      "Country": "USA",
+      "Phone": "555-0101",
+      "Company": "Acme Inc.",
+      "Position": "Manager",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 2,
+      "Name": "Jane Smith",
+      "Email": "jane.smith@example.com",
+      "Address": "456 Oak Ave",
+      "City": "Los Angeles",
+      "State": "CA",
+      "Zip": "90001",
+      "Country": "USA",
+      "Phone": "555-0102",
+      "Company": "Beta Corp",
+      "Position": "Engineer",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 3,
+      "Name": "Barbara Clark",
+      "Email": "barbara.clark@example.com",
+      "Address": "333 Oak St",
+      "City": "Charlotte",
+      "State": "NC",
+      "Zip": "28202",
+      "Country": "USA",
+      "Phone": "555-0115",
+      "Company": "Omicron LLC",
+      "Position": "Coordinator",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 4,
+      "Name": "Robert Brown",
+      "Email": "robert.brown@example.com",
+      "Address": "101 Maple St",
+      "City": "Houston",
+      "State": "TX",
+      "Zip": "77001",
+      "Country": "USA",
+      "Phone": "555-0104",
+      "Company": "Delta Co.",
+      "Position": "Analyst",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 5,
+      "Name": "James Rodriguez",
+      "Email": "james.rodriguez@example.com",
+      "Address": "707 Aspen Dr",
+      "City": "San Jose",
+      "State": "CA",
+      "Zip": "95101",
+      "Country": "USA",
+      "Phone": "555-0110",
+      "Company": "Epsilon Ltd.",
+      "Position": "Manager",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 6,
+      "Name": "Alice Johnson",
+      "Email": "alice.johnson@example.com",
+      "Address": "789 Pine Rd",
+      "City": "Chicago",
+      "State": "IL",
+      "Zip": "60601",
+      "Country": "USA",
+      "Phone": "555-0103",
+      "Company": "Zeta LLC",
+      "Position": "Designer",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 7,
+      "Name": "Michael Wilson",
+      "Email": "michael.wilson@example.com",
+      "Address": "303 Cedar Rd",
+      "City": "Philadelphia",
+      "State": "PA",
+      "Zip": "19019",
+      "Country": "USA",
+      "Phone": "555-0106",
+      "Company": "Beta Corp",
+      "Position": "Developer",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 8,
+      "Name": "Sarah Miller",
+      "Email": "sarah.miller@example.com",
+      "Address": "404 Birch Ln",
+      "City": "San Antonio",
+      "State": "TX",
+      "Zip": "78201",
+      "Country": "USA",
+      "Phone": "555-0107",
+      "Company": "Gamma Inc.",
+      "Position": "New",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 9,
+      "Name": "David Garcia",
+      "Email": "david.garcia@example.com",
+      "Address": "505 Spruce Ave",
+      "City": "San Diego",
+      "State": "CA",
+      "Zip": "92101",
+      "Country": "USA",
+      "Phone": "555-0108",
+      "Company": "Theta Co.",
+      "Position": "Director",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 10,
+      "Name": "Laura Martinez",
+      "Email": "laura.martinez@example.com",
+      "Address": "606 Walnut St",
+      "City": "Dallas",
+      "State": "TX",
+      "Zip": "75201",
+      "Country": "USA",
+      "Phone": "555-0109",
+      "Company": "Iota Corp",
+      "Position": "Supervisor",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 11,
+      "Name": "Linda Hernandez",
+      "Email": "linda.hernandez@example.com",
+      "Address": "808 Poplar Blvd",
+      "City": "Austin",
+      "State": "TX",
+      "Zip": "73301",
+      "Country": "USA",
+      "Phone": "555-0111",
+      "Company": "Lambda Inc.",
+      "Position": "Coordinator",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 12,
+      "Name": "Emily Davis",
+      "Email": "emily.davis@example.com",
+      "Address": "202 Elm St",
+      "City": "Phoenix",
+      "State": "AZ",
+      "Zip": "85001",
+      "Country": "USA",
+      "Phone": "555-0105",
+      "Company": "Mu LLC",
+      "Position": "New",
+      "Notes": "N/A"
+    }  
+  ];
 
   // ------------------------------------------------
   // 2) DOM REFERENCES
@@ -429,23 +601,32 @@ document.addEventListener('DOMContentLoaded', function() {
   // ------------------------------------------------
   buildTableHeader();
 
-  // 1) Load data from /data
+  // 1) Attempt to load data from /data
   fetch('/data')
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) {
+        // If /data not found (404), fallback
+        throw new Error("No data.json found on server");
+      }
+      return res.json();
+    })
     .then(data => {
-      // 2) We do NOT need an "id" field in JSON. We rely on "Index".
-      //    Just parse it if it's a string:
+      // If fetch succeeded, parse "Index"
       data.forEach(d => {
         d.Index = parseInt(d.Index, 10);
       });
       allData = data;
-
-      // 3) Initialize the drag-and-drop code from dragAndDrop.js
-      //    providing references if needed:
       initDragAndDrop(allData, displayPage);
-
-      // 4) Show the first page
       displayPage();
     })
-    .catch(err => console.error('Error loading data:', err));
+    .catch(err => {
+      // If server data not found or error, fallback
+      console.warn("Using fallback data instead:", err);
+      fallbackData.forEach(d => {
+        d.Index = parseInt(d.Index, 10);
+      });
+      allData = fallbackData;
+      initDragAndDrop(allData, displayPage);
+      displayPage();
+    });
 });

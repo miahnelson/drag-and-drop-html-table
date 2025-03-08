@@ -1,16 +1,22 @@
 // dragAndDrop.js
 
-// Global references to the data array and the display function
+// Global references to data & display function
 let allDataRef = null;
 let displayPageRef = null;
 
-// This function is called once in your main script to provide references
+/**
+ * Called once from script.js after data is loaded.
+ * @param {Array} dataArray - reference to allData
+ * @param {Function} displayFn - reference to displayPage
+ */
 function initDragAndDrop(dataArray, displayFn) {
   allDataRef = dataArray;
   displayPageRef = displayFn;
 }
 
-// Attaches the dragstart/dragend events to .drag-handle elements
+/**
+ * Attach dragstart/dragend to .drag-handle elements
+ */
 function attachRowDragEvents() {
   document.querySelectorAll('.drag-handle').forEach(handle => {
     handle.addEventListener('dragstart', dragStart);
@@ -22,7 +28,7 @@ function attachRowDragEvents() {
 let draggedRowElement = null;
 
 function dragStart(e) {
-  draggedRowElement = this.parentNode; // The <tr>
+  draggedRowElement = this.parentNode;
   e.dataTransfer.effectAllowed = 'move';
 }
 
@@ -31,25 +37,51 @@ function dragEnd() {
   clearDragOver();
 }
 
+/**
+ * Auto-scroll the page if the mouse is near the top or bottom edge
+ * @param {DragEvent} e
+ */
+function autoScroll(e) {
+  const scrollThreshold = 50;        // distance from top/bottom edge
+  const scrollSpeed = 8;            // how many pixels to scroll each event
+
+  // Current mouse Y position relative to the viewport
+  const mouseY = e.clientY;
+  const viewportHeight = window.innerHeight;
+
+  // If near the top, scroll up
+  if (mouseY < scrollThreshold) {
+    window.scrollBy(0, -scrollSpeed);
+  }
+  // If near the bottom, scroll down
+  else if (mouseY > viewportHeight - scrollThreshold) {
+    window.scrollBy(0, scrollSpeed);
+  }
+}
+
 function dragOver(e) {
   e.preventDefault();
   e.currentTarget.classList.add('drag-over');
+
+  // Attempt to auto-scroll if near top/bottom
+  autoScroll(e);
 }
 
 function dragLeave(e) {
   e.currentTarget.classList.remove('drag-over');
 }
 
-// drop(e, rowData) is triggered from your main script's row creation
-// We rely on row.dataset.indexVal (a numeric index) to reorder allData.
+/**
+ * drop(e, rowData) is triggered from script.js.
+ * We reorder allDataRef by matching x.Index to row.dataset.indexVal
+ */
 function drop(e, targetRowObj) {
   e.preventDefault();
   e.currentTarget.classList.remove('drag-over');
   if (!draggedRowElement || draggedRowElement === e.currentTarget) return;
 
-  // Identify the numeric "Index" of the dragged row
+  // Read the numeric "Index" from dataset
   const draggedIndexNum = parseInt(draggedRowElement.dataset.indexVal, 10);
-  // Identify the numeric "Index" of the target row
   const targetIndexNum = parseInt(e.currentTarget.dataset.indexVal, 10);
 
   // Find their positions in the global data array by matching x.Index
@@ -57,7 +89,7 @@ function drop(e, targetRowObj) {
   const targetObjPos = allDataRef.findIndex(x => x.Index === targetIndexNum);
 
   if (draggedObjPos < 0 || targetObjPos < 0) {
-    console.error("Dragged or target object not found in allData (using 'Index')");
+    console.error("Dragged or target object not found in allData");
     return;
   }
 
@@ -66,10 +98,7 @@ function drop(e, targetRowObj) {
   const offset = e.clientY - rect.top;
   const dropAbove = offset < rect.height / 2;
 
-  // Remove the dragged object from its old position
   const [draggedObj] = allDataRef.splice(draggedObjPos, 1);
-
-  // Calculate the new position
   let insertPos = dropAbove ? targetObjPos : targetObjPos + 1;
   if (draggedObjPos < targetObjPos) {
     insertPos--;
@@ -77,10 +106,9 @@ function drop(e, targetRowObj) {
   if (insertPos < 0) insertPos = 0;
   if (insertPos > allDataRef.length) insertPos = allDataRef.length;
 
-  // Insert the dragged object at the new position
   allDataRef.splice(insertPos, 0, draggedObj);
 
-  // Redisplay the table using the function from the main script
+  // Redisplay
   displayPageRef();
 }
 
@@ -88,7 +116,7 @@ function clearDragOver() {
   document.querySelectorAll('tr').forEach(row => row.classList.remove('drag-over'));
 }
 
-// Expose these functions to the global scope
+// Expose globally
 window.initDragAndDrop = initDragAndDrop;
 window.attachRowDragEvents = attachRowDragEvents;
 window.dragOver = dragOver;

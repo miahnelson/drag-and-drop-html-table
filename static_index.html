@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Editable, Draggable & Bulk Editable Table</title>
+  <title>Draggable Table with Fallback Data</title>
   <style>
 /* Global Styles */
 body {
@@ -178,51 +178,27 @@ select:focus {
 </head>
 <body>
 
-  <!-- Top Bar: Pagination, Search, Column Preferences, Save & Cancel -->
-  <div id="topBar" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-    
-    <!-- Left Section: Pagination + Search -->
-    <div id="leftSection" style="display: flex; align-items: center; gap: 12px;">
-      
-      <!-- Search Input -->
-      <label for="searchInput">Search:</label>
-      <input type="text" id="searchInput" placeholder="Type to filter..." aria-label="Search Table">
-
-      <!-- Rows Per Page Dropdown -->
-      <label for="rowsPerPageSelect">Rows per page:</label>
-      <select id="rowsPerPageSelect">
-        <option value="20" selected>20</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-        <option value="200">200</option>
-      </select>
-
-      <!-- Pagination Buttons -->
-      <button id="prevPageBtn" aria-label="Previous Page">Prev</button>
-      <span id="pageInfo"></span>
-      <button id="nextPageBtn" aria-label="Next Page">Next</button>
-    </div>
-
-    <!-- Right Section: Column Preferences, Save, Cancel -->
-    <div id="buttonsSection" style="display: flex; align-items: center; gap: 12px;">
-      <button id="columnPrefsBtn" title="Column Preferences">⚙️ Columns</button>
-      <button id="saveBtn">Save</button>
-      <button id="cancelBtn">Cancel</button>
-    </div>
-
+  <!-- Your top bar, search, pagination, etc. -->
+  <div id="topBar" style="margin-bottom: 10px;">
+    <!-- Example controls or placeholders -->
+    <input type="text" id="searchInput" placeholder="Search...">
+    <select id="rowsPerPageSelect">
+      <option value="20" selected>20</option>
+      <option value="50">50</option>
+      <option value="100">100</option>
+    </select>
+    <button id="prevPageBtn">Prev</button>
+    <span id="pageInfo"></span>
+    <button id="nextPageBtn">Next</button>
+    <button id="saveBtn">Save</button>
+    <button id="cancelBtn">Cancel</button>
+    <button id="columnPrefsBtn">Columns</button>
   </div>
 
-  <!-- Editable & Draggable Table -->
-  <table id="editableTable">
-    <thead id="tableHeader">
-      <tr>
-        <th><input type="checkbox" id="selectAllCheckbox" title="Select All"></th>
-        <!-- Dynamic Columns Will Be Injected Here -->
-      </tr>
-    </thead>
-    <tbody id="tableBody">
-      <!-- Table Data Will Be Dynamically Populated -->
-    </tbody>
+  <!-- Table -->
+  <table>
+    <thead id="tableHeader"></thead>
+    <tbody id="tableBody"></tbody>
   </table>
 
   <!-- Column Preferences Modal -->
@@ -230,577 +206,577 @@ select:focus {
     <div class="modal-content">
       <span class="close">&times;</span>
       <h2>Column Preferences</h2>
-      <ul id="columnPrefsList">
-        <!-- Dynamic Column Options -->
-      </ul>
+      <ul id="columnPrefsList"></ul>
       <button id="savePrefsBtn">Save Preferences</button>
       <button id="cancelPrefsBtn">Cancel</button>
     </div>
   </div>
 
+  <!-- Scripts -->
   <script>
 var inlineData = [
   {
+    "Index": 1,
+    "Name": "John Doe",
+    "Email": "john.doe@example.com",
     "Address": "123 Main St",
     "City": "New York",
-    "Company": "Acme Inc.",
-    "Country": "USA",
-    "Email": "john.doe@example.com",
-    "Index": "1",
-    "Name": "John Doe",
-    "Notes": "N/A",
-    "Phone": "555-0101",
-    "Position": "Manager",
     "State": "NY",
-    "Zip": "10001"
+    "Zip": "10001",
+    "Country": "USA",
+    "Phone": "555-0101",
+    "Company": "Acme Inc.",
+    "Position": "Manager",
+    "Notes": "N/A"
   },
   {
+    "Index": 2,
+    "Name": "Jane Smith",
+    "Email": "jane.smith@example.com",
     "Address": "456 Oak Ave",
     "City": "Los Angeles",
-    "Company": "Beta Corp",
-    "Country": "USA",
-    "Email": "jane.smith@example.com",
-    "Index": "2",
-    "Name": "Jane Smith",
-    "Notes": "N/A",
-    "Phone": "555-0102",
-    "Position": "Engineer",
     "State": "CA",
-    "Zip": "90001"
+    "Zip": "90001",
+    "Country": "USA",
+    "Phone": "555-0102",
+    "Company": "Beta Corp",
+    "Position": "Engineer",
+    "Notes": "N/A"
   },
   {
+    "Index": 3,
+    "Name": "Barbara Clark",
+    "Email": "barbara.clark@example.com",
     "Address": "333 Oak St",
     "City": "Charlotte",
-    "Company": "Omicron LLC",
-    "Country": "USA",
-    "Email": "barbara.clark@example.com",
-    "Index": "3",
-    "Name": "Barbara Clark",
-    "Notes": "N/A",
-    "Phone": "555-0115",
-    "Position": "Coordinator",
     "State": "NC",
-    "Zip": "28202"
+    "Zip": "28202",
+    "Country": "USA",
+    "Phone": "555-0115",
+    "Company": "Omicron LLC",
+    "Position": "Coordinator",
+    "Notes": "N/A"
   },
   {
-    "Address": "101 Maple St",
-    "City": "Chicago",
-    "Company": "Delta Co.",
-    "Country": "USA",
-    "Email": "robert.brown@example.com",
-    "Index": "4",
+    "Index": 4,
     "Name": "Robert Brown",
-    "Notes": "N/A",
-    "Phone": "555-0104",
-    "Position": "Analyst",
+    "Email": "robert.brown@example.com",
+    "Address": "101 Maple St",
+    "City": "Houston",
     "State": "TX",
-    "Zip": "77001"
+    "Zip": "77001",
+    "Country": "USA",
+    "Phone": "555-0104",
+    "Company": "Delta Co.",
+    "Position": "Analyst",
+    "Notes": "N/A"
   },
   {
-    "Address": "sdgvasdfbg",
-    "City": "Chicago",
-    "Company": "Kappa Corp",
-    "Country": "USA",
-    "Email": "james.rodriguez@example.com",
-    "Index": "5",
+    "Index": 5,
     "Name": "James Rodriguez",
-    "Notes": "N/A",
-    "Phone": "555-0110",
-    "Position": "Manager",
-    "State": "CA",
-    "Zip": "95101"
-  },
-  {
-    "Address": "789 Pine Rd",
-    "City": "Chicago",
-    "Company": "Gamma LLC",
-    "Country": "USA",
-    "Email": "alice.johnson@example.com",
-    "Index": "6",
-    "Name": "Jeremiah",
-    "Notes": "N/A",
-    "Phone": "555-0103",
-    "Position": "Designer",
-    "State": "IL",
-    "Zip": "60601"
-  },
-  {
-    "Address": "303 Cedar Rd",
-    "City": "Philadelphia",
-    "Company": "Zeta Ltd.",
-    "Country": "USA",
-    "Email": "michael.wilson@example.com",
-    "Index": "7",
-    "Name": "Jeremiah",
-    "Notes": "N/A",
-    "Phone": "555-0106",
-    "Position": "Developer",
-    "State": "PA",
-    "Zip": "19019"
-  },
-  {
-    "Address": "404 Birch Ln",
-    "City": "San Antonio",
-    "Company": "Eta LLC",
-    "Country": "USA",
-    "Email": "sarah.miller@example.com",
-    "Index": "8",
-    "Name": "Sarah Miller",
-    "Notes": "N/A",
-    "Phone": "555-0107",
-    "Position": "New",
-    "State": "TX",
-    "Zip": "78201"
-  },
-  {
-    "Address": "505 Spruce Ave",
-    "City": "San Diego",
-    "Company": "Theta Inc.",
-    "Country": "USA",
-    "Email": "david.garcia@example.com",
-    "Index": "9",
-    "Name": "David Garcia",
-    "Notes": "N/A",
-    "Phone": "555-0108",
-    "Position": "Director",
-    "State": "CA",
-    "Zip": "92101"
-  },
-  {
-    "Address": "606 Walnut St",
-    "City": "Chicago",
-    "Company": "Iota Co.",
-    "Country": "USA",
-    "Email": "laura.martinez@example.com",
-    "Index": "10",
-    "Name": "Laura Martinez",
-    "Notes": "N/A",
-    "Phone": "555-0109",
-    "Position": "Supervisor",
-    "State": "TX",
-    "Zip": "75201"
-  },
-  {
-    "Address": "808 Poplar Blvd",
-    "City": "Austin",
-    "Company": "Lambda Inc.",
-    "Country": "USA",
-    "Email": "linda.hernandez@example.com",
-    "Index": "11",
-    "Name": "Linda Hernandez",
-    "Notes": "N/A",
-    "Phone": "555-0111",
-    "Position": "Jeremiah",
-    "State": "TX",
-    "Zip": "73301"
-  },
-  {
-    "Address": "202 Elm St",
-    "City": "Phoenix",
-    "Company": "Epsilon Inc.",
-    "Country": "USA",
-    "Email": "emily.davis@example.com",
-    "Index": "12",
-    "Name": "Emily Davis",
-    "Notes": "N/A",
-    "Phone": "555-0105",
-    "Position": "New",
-    "State": "AZ",
-    "Zip": "85001"
-  },
-  {
-    "Address": "909 Fir St",
-    "City": "Jacksonville",
-    "Company": "Mu LLC",
-    "Country": "USA",
-    "Email": "steven.lee@example.com",
-    "Index": "13",
-    "Name": "Steven Lee",
-    "Notes": "N/A",
-    "Phone": "555-0112",
-    "Position": "Engineer",
-    "State": "FL",
-    "Zip": "32099"
-  },
-  {
-    "Address": "111 Cherry Ave",
-    "City": "Fort Worth",
-    "Company": "Nu Corp",
-    "Country": "USA",
-    "Email": "patricia.white@example.com",
-    "Index": "14",
-    "Name": "Patricia White",
-    "Notes": "N/A",
-    "Phone": "555-0113",
-    "Position": "Designer",
-    "State": "TX",
-    "Zip": "76101"
-  },
-  {
-    "Address": "222 Pine St",
-    "City": "Columbus",
-    "Company": "Xi Inc.",
-    "Country": "USA",
-    "Email": "chris.harris@example.com",
-    "Index": "15",
-    "Name": "Christopher Harris",
-    "Notes": "N/A",
-    "Phone": "555-0114",
-    "Position": "Developer",
-    "State": "OH",
-    "Zip": "43085"
-  },
-  {
-    "Address": "444 Maple Ave",
-    "City": "Detroit",
-    "Company": "Pi Co.",
-    "Country": "USA",
-    "Email": "daniel.lewis@example.com",
-    "Index": "16",
-    "Name": "Daniel Lewis",
-    "Notes": "N/A",
-    "Phone": "555-0116",
-    "Position": "Supervisor",
-    "State": "MI",
-    "Zip": "48201"
-  },
-  {
-    "Address": "555 Elm St",
-    "City": "Memphis",
-    "Company": "Rho Corp",
-    "Country": "USA",
-    "Email": "susan.robinson@example.com",
-    "Index": "17",
-    "Name": "Susan Robinson",
-    "Notes": "N/A",
-    "Phone": "555-0117",
-    "Position": "Manager",
-    "State": "TN",
-    "Zip": "37501"
-  },
-  {
-    "Address": "666 Cedar Rd",
-    "City": "Boston",
-    "Company": "Sigma Inc.",
-    "Country": "USA",
-    "Email": "paul.walker@example.com",
-    "Index": "18",
-    "Name": "Paul Walker",
-    "Notes": "N/A",
-    "Phone": "555-0118",
-    "Position": "Analyst",
-    "State": "MA",
-    "Zip": "02108"
-  },
-  {
-    "Address": "777 Birch Ln",
-    "City": "Seattle",
-    "Company": "Tau LLC",
-    "Country": "USA",
-    "Email": "karen.hall@example.com",
-    "Index": "19",
-    "Name": "Karen Hall",
-    "Notes": "N/A",
-    "Phone": "555-0119",
-    "Position": "Engineer",
-    "State": "WA",
-    "Zip": "98101"
-  },
-  {
-    "Address": "888 Spruce Ave",
-    "City": "Denver",
-    "Company": "Upsilon Co.",
-    "Country": "USA",
-    "Email": "mark.young@example.com",
-    "Index": "20",
-    "Name": "Mark Young",
-    "Notes": "N/A",
-    "Phone": "555-0120",
-    "Position": "Director",
-    "State": "CO",
-    "Zip": "80201"
-  },
-  {
-    "Address": "123 Main St",
-    "City": "New York",
-    "Company": "Acme Inc.",
-    "Country": "USA",
-    "Email": "john.doe@example.com",
-    "Index": "1",
-    "Name": "John Doe",
-    "Notes": "N/A",
-    "Phone": "555-0101",
-    "Position": "Manager",
-    "State": "NY",
-    "Zip": "10001"
-  },
-  {
-    "Address": "456 Oak Ave",
-    "City": "Los Angeles",
-    "Company": "Beta Corp",
-    "Country": "USA",
-    "Email": "jane.smith@example.com",
-    "Index": "2",
-    "Name": "Jane Smith",
-    "Notes": "N/A",
-    "Phone": "555-0102",
-    "Position": "Engineer",
-    "State": "CA",
-    "Zip": "90001"
-  },
-  {
-    "Address": "333 Oak St",
-    "City": "Charlotte",
-    "Company": "Omicron LLC",
-    "Country": "USA",
-    "Email": "barbara.clark@example.com",
-    "Index": "3",
-    "Name": "Barbara Clark",
-    "Notes": "N/A",
-    "Phone": "555-0115",
-    "Position": "Coordinator",
-    "State": "NC",
-    "Zip": "28202"
-  },
-  {
-    "Address": "101 Maple St",
-    "City": "Chicago",
-    "Company": "Delta Co.",
-    "Country": "USA",
-    "Email": "robert.brown@example.com",
-    "Index": "4",
-    "Name": "Robert Brown",
-    "Notes": "N/A",
-    "Phone": "555-0104",
-    "Position": "Analyst",
-    "State": "TX",
-    "Zip": "77001"
-  },
-  {
+    "Email": "james.rodriguez@example.com",
     "Address": "707 Aspen Dr",
-    "City": "Chicago",
-    "Company": "Kappa Corp",
-    "Country": "USA",
-    "Email": "james.rodriguez@example.com",
-    "Index": "5",
-    "Name": "James Rodriguez",
-    "Notes": "N/A",
-    "Phone": "555-0110",
-    "Position": "Manager",
+    "City": "San Jose",
     "State": "CA",
-    "Zip": "95101"
+    "Zip": "95101",
+    "Country": "USA",
+    "Phone": "555-0110",
+    "Company": "Epsilon Ltd.",
+    "Position": "Manager",
+    "Notes": "N/A"
   },
   {
+    "Index": 6,
+    "Name": "Alice Johnson",
+    "Email": "alice.johnson@example.com",
     "Address": "789 Pine Rd",
     "City": "Chicago",
-    "Company": "Gamma LLC",
-    "Country": "USA",
-    "Email": "alice.johnson@example.com",
-    "Index": "6",
-    "Name": "Jeremiah",
-    "Notes": "N/A",
-    "Phone": "555-0103",
-    "Position": "Designer",
     "State": "IL",
-    "Zip": "60601"
+    "Zip": "60601",
+    "Country": "USA",
+    "Phone": "555-0103",
+    "Company": "Zeta LLC",
+    "Position": "Designer",
+    "Notes": "N/A"
   },
   {
+    "Index": 7,
+    "Name": "Michael Wilson",
+    "Email": "michael.wilson@example.com",
     "Address": "303 Cedar Rd",
     "City": "Philadelphia",
-    "Company": "Zeta Ltd.",
-    "Country": "USA",
-    "Email": "michael.wilson@example.com",
-    "Index": "7",
-    "Name": "Jeremiah",
-    "Notes": "N/A",
-    "Phone": "555-0106",
-    "Position": "Developer",
     "State": "PA",
-    "Zip": "19019"
+    "Zip": "19019",
+    "Country": "USA",
+    "Phone": "555-0106",
+    "Company": "Beta Corp",
+    "Position": "Developer",
+    "Notes": "N/A"
   },
   {
+    "Index": 8,
+    "Name": "Sarah Miller",
+    "Email": "sarah.miller@example.com",
     "Address": "404 Birch Ln",
     "City": "San Antonio",
-    "Company": "Eta LLC",
-    "Country": "USA",
-    "Email": "sarah.miller@example.com",
-    "Index": "8",
-    "Name": "Sarah Miller",
-    "Notes": "N/A",
-    "Phone": "555-0107",
-    "Position": "New",
     "State": "TX",
-    "Zip": "78201"
+    "Zip": "78201",
+    "Country": "USA",
+    "Phone": "555-0107",
+    "Company": "Gamma Inc.",
+    "Position": "New",
+    "Notes": "N/A"
   },
   {
+    "Index": 9,
+    "Name": "David Garcia",
+    "Email": "david.garcia@example.com",
     "Address": "505 Spruce Ave",
     "City": "San Diego",
-    "Company": "Theta Inc.",
-    "Country": "USA",
-    "Email": "david.garcia@example.com",
-    "Index": "9",
-    "Name": "David Garcia",
-    "Notes": "N/A",
-    "Phone": "555-0108",
-    "Position": "Director",
     "State": "CA",
-    "Zip": "92101"
-  },
-  {
-    "Address": "606 Walnut St",
-    "City": "Chicago",
-    "Company": "Iota Co.",
+    "Zip": "92101",
     "Country": "USA",
-    "Email": "laura.martinez@example.com",
-    "Index": "10",
-    "Name": "Laura Martinez",
-    "Notes": "N/A",
-    "Phone": "555-0109",
-    "Position": "Supervisor",
-    "State": "TX",
-    "Zip": "75201"
+    "Phone": "555-0108",
+    "Company": "Theta Co.",
+    "Position": "Director",
+    "Notes": "N/A"
   },
   {
+    "Index": 10,
+    "Name": "Laura Martinez",
+    "Email": "laura.martinez@example.com",
+    "Address": "606 Walnut St",
+    "City": "Dallas",
+    "State": "TX",
+    "Zip": "75201",
+    "Country": "USA",
+    "Phone": "555-0109",
+    "Company": "Iota Corp",
+    "Position": "Supervisor",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 11,
+    "Name": "Linda Hernandez",
+    "Email": "linda.hernandez@example.com",
     "Address": "808 Poplar Blvd",
     "City": "Austin",
-    "Company": "Lambda Inc.",
-    "Country": "USA",
-    "Email": "linda.hernandez@example.com",
-    "Index": "11",
-    "Name": "Linda Hernandez",
-    "Notes": "N/A",
-    "Phone": "555-0111",
-    "Position": "Jeremiah",
     "State": "TX",
-    "Zip": "73301"
+    "Zip": "73301",
+    "Country": "USA",
+    "Phone": "555-0111",
+    "Company": "Lambda Inc.",
+    "Position": "Coordinator",
+    "Notes": "N/A"
   },
   {
+    "Index": 12,
+    "Name": "Emily Davis",
+    "Email": "emily.davis@example.com",
     "Address": "202 Elm St",
     "City": "Phoenix",
-    "Company": "Epsilon Inc.",
-    "Country": "USA",
-    "Email": "emily.davis@example.com",
-    "Index": "12",
-    "Name": "Emily Davis",
-    "Notes": "N/A",
-    "Phone": "555-0105",
-    "Position": "New",
     "State": "AZ",
-    "Zip": "85001"
+    "Zip": "85001",
+    "Country": "USA",
+    "Phone": "555-0105",
+    "Company": "Mu LLC",
+    "Position": "New",
+    "Notes": "N/A"
   },
   {
+    "Index": 13,
+    "Name": "Steven Lee",
+    "Email": "steven.lee@example.com",
     "Address": "909 Fir St",
     "City": "Jacksonville",
-    "Company": "Mu LLC",
-    "Country": "USA",
-    "Email": "steven.lee@example.com",
-    "Index": "13",
-    "Name": "Steven Lee",
-    "Notes": "N/A",
-    "Phone": "555-0112",
-    "Position": "Engineer",
     "State": "FL",
-    "Zip": "32099"
+    "Zip": "32099",
+    "Country": "USA",
+    "Phone": "555-0112",
+    "Company": "Nu Corp",
+    "Position": "Engineer",
+    "Notes": "N/A"
   },
   {
+    "Index": 14,
+    "Name": "Patricia White",
+    "Email": "patricia.white@example.com",
     "Address": "111 Cherry Ave",
     "City": "Fort Worth",
-    "Company": "Nu Corp",
-    "Country": "USA",
-    "Email": "patricia.white@example.com",
-    "Index": "14",
-    "Name": "Patricia White",
-    "Notes": "N/A",
-    "Phone": "555-0113",
-    "Position": "Designer",
     "State": "TX",
-    "Zip": "76101"
+    "Zip": "76101",
+    "Country": "USA",
+    "Phone": "555-0113",
+    "Company": "Xi Ltd.",
+    "Position": "Designer",
+    "Notes": "N/A"
   },
   {
+    "Index": 15,
+    "Name": "Christopher Harris",
+    "Email": "chris.harris@example.com",
     "Address": "222 Pine St",
     "City": "Columbus",
-    "Company": "Xi Inc.",
-    "Country": "USA",
-    "Email": "chris.harris@example.com",
-    "Index": "15",
-    "Name": "Christopher Harris",
-    "Notes": "N/A",
-    "Phone": "555-0114",
-    "Position": "Developer",
     "State": "OH",
-    "Zip": "43085"
+    "Zip": "43085",
+    "Country": "USA",
+    "Phone": "555-0114",
+    "Company": "Pi Inc.",
+    "Position": "Developer",
+    "Notes": "N/A"
   },
   {
+    "Index": 16,
+    "Name": "Daniel Lewis",
+    "Email": "daniel.lewis@example.com",
     "Address": "444 Maple Ave",
     "City": "Detroit",
-    "Company": "Pi Co.",
-    "Country": "USA",
-    "Email": "daniel.lewis@example.com",
-    "Index": "16",
-    "Name": "Daniel Lewis",
-    "Notes": "N/A",
-    "Phone": "555-0116",
-    "Position": "Supervisor",
     "State": "MI",
-    "Zip": "48201"
+    "Zip": "48201",
+    "Country": "USA",
+    "Phone": "555-0116",
+    "Company": "Rho LLC",
+    "Position": "Supervisor",
+    "Notes": "N/A"
   },
   {
+    "Index": 17,
+    "Name": "Susan Robinson",
+    "Email": "susan.robinson@example.com",
     "Address": "555 Elm St",
     "City": "Memphis",
-    "Company": "Rho Corp",
-    "Country": "USA",
-    "Email": "susan.robinson@example.com",
-    "Index": "17",
-    "Name": "Susan Robinson",
-    "Notes": "N/A",
-    "Phone": "555-0117",
-    "Position": "Manager",
     "State": "TN",
-    "Zip": "37501"
+    "Zip": "37501",
+    "Country": "USA",
+    "Phone": "555-0117",
+    "Company": "Sigma Co.",
+    "Position": "Manager",
+    "Notes": "N/A"
   },
   {
+    "Index": 18,
+    "Name": "Paul Walker",
+    "Email": "paul.walker@example.com",
     "Address": "666 Cedar Rd",
     "City": "Boston",
-    "Company": "Sigma Inc.",
-    "Country": "USA",
-    "Email": "paul.walker@example.com",
-    "Index": "18",
-    "Name": "Paul Walker",
-    "Notes": "N/A",
-    "Phone": "555-0118",
-    "Position": "Analyst",
     "State": "MA",
-    "Zip": "02108"
+    "Zip": "02108",
+    "Country": "USA",
+    "Phone": "555-0118",
+    "Company": "Tau Inc.",
+    "Position": "Analyst",
+    "Notes": "N/A"
   },
   {
+    "Index": 19,
+    "Name": "Karen Hall",
+    "Email": "karen.hall@example.com",
     "Address": "777 Birch Ln",
     "City": "Seattle",
-    "Company": "Tau LLC",
-    "Country": "USA",
-    "Email": "karen.hall@example.com",
-    "Index": "19",
-    "Name": "Karen Hall",
-    "Notes": "N/A",
-    "Phone": "555-0119",
-    "Position": "Engineer",
     "State": "WA",
-    "Zip": "98101"
+    "Zip": "98101",
+    "Country": "USA",
+    "Phone": "555-0119",
+    "Company": "Upsilon LLC",
+    "Position": "Engineer",
+    "Notes": "N/A"
   },
   {
+    "Index": 20,
+    "Name": "Mark Young",
+    "Email": "mark.young@example.com",
     "Address": "888 Spruce Ave",
     "City": "Denver",
-    "Company": "Upsilon Co.",
-    "Country": "USA",
-    "Email": "mark.young@example.com",
-    "Index": "20",
-    "Name": "Mark Young",
-    "Notes": "N/A",
-    "Phone": "555-0120",
-    "Position": "Director",
     "State": "CO",
-    "Zip": "80201"
+    "Zip": "80201",
+    "Country": "USA",
+    "Phone": "555-0120",
+    "Company": "Omega Inc.",
+    "Position": "Director",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 1,
+    "Name": "John Doe",
+    "Email": "john.doe@example.com",
+    "Address": "123 Main St",
+    "City": "New York",
+    "State": "NY",
+    "Zip": "10001",
+    "Country": "USA",
+    "Phone": "555-0101",
+    "Company": "Acme Inc.",
+    "Position": "Manager",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 2,
+    "Name": "Jane Smith",
+    "Email": "jane.smith@example.com",
+    "Address": "456 Oak Ave",
+    "City": "Los Angeles",
+    "State": "CA",
+    "Zip": "90001",
+    "Country": "USA",
+    "Phone": "555-0102",
+    "Company": "Beta Corp",
+    "Position": "Engineer",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 3,
+    "Name": "Barbara Clark",
+    "Email": "barbara.clark@example.com",
+    "Address": "333 Oak St",
+    "City": "Charlotte",
+    "State": "NC",
+    "Zip": "28202",
+    "Country": "USA",
+    "Phone": "555-0115",
+    "Company": "Omicron LLC",
+    "Position": "Coordinator",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 4,
+    "Name": "Robert Brown",
+    "Email": "robert.brown@example.com",
+    "Address": "101 Maple St",
+    "City": "Houston",
+    "State": "TX",
+    "Zip": "77001",
+    "Country": "USA",
+    "Phone": "555-0104",
+    "Company": "Delta Co.",
+    "Position": "Analyst",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 5,
+    "Name": "James Rodriguez",
+    "Email": "james.rodriguez@example.com",
+    "Address": "707 Aspen Dr",
+    "City": "San Jose",
+    "State": "CA",
+    "Zip": "95101",
+    "Country": "USA",
+    "Phone": "555-0110",
+    "Company": "Epsilon Ltd.",
+    "Position": "Manager",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 6,
+    "Name": "Alice Johnson",
+    "Email": "alice.johnson@example.com",
+    "Address": "789 Pine Rd",
+    "City": "Chicago",
+    "State": "IL",
+    "Zip": "60601",
+    "Country": "USA",
+    "Phone": "555-0103",
+    "Company": "Zeta LLC",
+    "Position": "Designer",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 7,
+    "Name": "Michael Wilson",
+    "Email": "michael.wilson@example.com",
+    "Address": "303 Cedar Rd",
+    "City": "Philadelphia",
+    "State": "PA",
+    "Zip": "19019",
+    "Country": "USA",
+    "Phone": "555-0106",
+    "Company": "Beta Corp",
+    "Position": "Developer",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 8,
+    "Name": "Sarah Miller",
+    "Email": "sarah.miller@example.com",
+    "Address": "404 Birch Ln",
+    "City": "San Antonio",
+    "State": "TX",
+    "Zip": "78201",
+    "Country": "USA",
+    "Phone": "555-0107",
+    "Company": "Gamma Inc.",
+    "Position": "New",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 9,
+    "Name": "David Garcia",
+    "Email": "david.garcia@example.com",
+    "Address": "505 Spruce Ave",
+    "City": "San Diego",
+    "State": "CA",
+    "Zip": "92101",
+    "Country": "USA",
+    "Phone": "555-0108",
+    "Company": "Theta Co.",
+    "Position": "Director",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 10,
+    "Name": "Laura Martinez",
+    "Email": "laura.martinez@example.com",
+    "Address": "606 Walnut St",
+    "City": "Dallas",
+    "State": "TX",
+    "Zip": "75201",
+    "Country": "USA",
+    "Phone": "555-0109",
+    "Company": "Iota Corp",
+    "Position": "Supervisor",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 11,
+    "Name": "Linda Hernandez",
+    "Email": "linda.hernandez@example.com",
+    "Address": "808 Poplar Blvd",
+    "City": "Austin",
+    "State": "TX",
+    "Zip": "73301",
+    "Country": "USA",
+    "Phone": "555-0111",
+    "Company": "Lambda Inc.",
+    "Position": "Coordinator",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 12,
+    "Name": "Emily Davis",
+    "Email": "emily.davis@example.com",
+    "Address": "202 Elm St",
+    "City": "Phoenix",
+    "State": "AZ",
+    "Zip": "85001",
+    "Country": "USA",
+    "Phone": "555-0105",
+    "Company": "Mu LLC",
+    "Position": "New",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 13,
+    "Name": "Steven Lee",
+    "Email": "steven.lee@example.com",
+    "Address": "909 Fir St",
+    "City": "Jacksonville",
+    "State": "FL",
+    "Zip": "32099",
+    "Country": "USA",
+    "Phone": "555-0112",
+    "Company": "Nu Corp",
+    "Position": "Engineer",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 14,
+    "Name": "Patricia White",
+    "Email": "patricia.white@example.com",
+    "Address": "111 Cherry Ave",
+    "City": "Fort Worth",
+    "State": "TX",
+    "Zip": "76101",
+    "Country": "USA",
+    "Phone": "555-0113",
+    "Company": "Xi Ltd.",
+    "Position": "Designer",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 15,
+    "Name": "Christopher Harris",
+    "Email": "chris.harris@example.com",
+    "Address": "222 Pine St",
+    "City": "Columbus",
+    "State": "OH",
+    "Zip": "43085",
+    "Country": "USA",
+    "Phone": "555-0114",
+    "Company": "Pi Inc.",
+    "Position": "Developer",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 16,
+    "Name": "Daniel Lewis",
+    "Email": "daniel.lewis@example.com",
+    "Address": "444 Maple Ave",
+    "City": "Detroit",
+    "State": "MI",
+    "Zip": "48201",
+    "Country": "USA",
+    "Phone": "555-0116",
+    "Company": "Rho LLC",
+    "Position": "Supervisor",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 17,
+    "Name": "Susan Robinson",
+    "Email": "susan.robinson@example.com",
+    "Address": "555 Elm St",
+    "City": "Memphis",
+    "State": "TN",
+    "Zip": "37501",
+    "Country": "USA",
+    "Phone": "555-0117",
+    "Company": "Sigma Co.",
+    "Position": "Manager",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 18,
+    "Name": "Paul Walker",
+    "Email": "paul.walker@example.com",
+    "Address": "666 Cedar Rd",
+    "City": "Boston",
+    "State": "MA",
+    "Zip": "02108",
+    "Country": "USA",
+    "Phone": "555-0118",
+    "Company": "Tau Inc.",
+    "Position": "Analyst",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 19,
+    "Name": "Karen Hall",
+    "Email": "karen.hall@example.com",
+    "Address": "777 Birch Ln",
+    "City": "Seattle",
+    "State": "WA",
+    "Zip": "98101",
+    "Country": "USA",
+    "Phone": "555-0119",
+    "Company": "Upsilon LLC",
+    "Position": "Engineer",
+    "Notes": "N/A"
+  },
+  {
+    "Index": 20,
+    "Name": "Mark Young",
+    "Email": "mark.young@example.com",
+    "Address": "888 Spruce Ave",
+    "City": "Denver",
+    "State": "CO",
+    "Zip": "80201",
+    "Country": "USA",
+    "Phone": "555-0120",
+    "Company": "Omega Inc.",
+    "Position": "Director",
+    "Notes": "N/A"
   }
-];
+]
+;
 </script>
 <script>
 // script.js
@@ -808,7 +784,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // ------------------------------------------------
   // 1) STATE: Data, Pagination, Columns, Search
   // ------------------------------------------------
-  let allData = [];           // All rows loaded from /data
+  let allData = [];           // All rows loaded from /data or fallback
   let currentPage = 1;        // Current page
   let rowsPerPage = 20;       // Default rows per page
   let searchString = "";      // Current text filter
@@ -829,6 +805,178 @@ document.addEventListener('DOMContentLoaded', function() {
     { name: "Notes", visible: true }
   ];
   let columnsPref = loadColumnPreferences() || defaultColumns;
+
+  // Fallback data if /data is missing
+  const fallbackData = [
+    {
+      "Index": 1,
+      "Name": "John Doe",
+      "Email": "john.doe@example.com",
+      "Address": "123 Main St",
+      "City": "New York",
+      "State": "NY",
+      "Zip": "10001",
+      "Country": "USA",
+      "Phone": "555-0101",
+      "Company": "Acme Inc.",
+      "Position": "Manager",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 2,
+      "Name": "Jane Smith",
+      "Email": "jane.smith@example.com",
+      "Address": "456 Oak Ave",
+      "City": "Los Angeles",
+      "State": "CA",
+      "Zip": "90001",
+      "Country": "USA",
+      "Phone": "555-0102",
+      "Company": "Beta Corp",
+      "Position": "Engineer",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 3,
+      "Name": "Barbara Clark",
+      "Email": "barbara.clark@example.com",
+      "Address": "333 Oak St",
+      "City": "Charlotte",
+      "State": "NC",
+      "Zip": "28202",
+      "Country": "USA",
+      "Phone": "555-0115",
+      "Company": "Omicron LLC",
+      "Position": "Coordinator",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 4,
+      "Name": "Robert Brown",
+      "Email": "robert.brown@example.com",
+      "Address": "101 Maple St",
+      "City": "Houston",
+      "State": "TX",
+      "Zip": "77001",
+      "Country": "USA",
+      "Phone": "555-0104",
+      "Company": "Delta Co.",
+      "Position": "Analyst",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 5,
+      "Name": "James Rodriguez",
+      "Email": "james.rodriguez@example.com",
+      "Address": "707 Aspen Dr",
+      "City": "San Jose",
+      "State": "CA",
+      "Zip": "95101",
+      "Country": "USA",
+      "Phone": "555-0110",
+      "Company": "Epsilon Ltd.",
+      "Position": "Manager",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 6,
+      "Name": "Alice Johnson",
+      "Email": "alice.johnson@example.com",
+      "Address": "789 Pine Rd",
+      "City": "Chicago",
+      "State": "IL",
+      "Zip": "60601",
+      "Country": "USA",
+      "Phone": "555-0103",
+      "Company": "Zeta LLC",
+      "Position": "Designer",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 7,
+      "Name": "Michael Wilson",
+      "Email": "michael.wilson@example.com",
+      "Address": "303 Cedar Rd",
+      "City": "Philadelphia",
+      "State": "PA",
+      "Zip": "19019",
+      "Country": "USA",
+      "Phone": "555-0106",
+      "Company": "Beta Corp",
+      "Position": "Developer",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 8,
+      "Name": "Sarah Miller",
+      "Email": "sarah.miller@example.com",
+      "Address": "404 Birch Ln",
+      "City": "San Antonio",
+      "State": "TX",
+      "Zip": "78201",
+      "Country": "USA",
+      "Phone": "555-0107",
+      "Company": "Gamma Inc.",
+      "Position": "New",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 9,
+      "Name": "David Garcia",
+      "Email": "david.garcia@example.com",
+      "Address": "505 Spruce Ave",
+      "City": "San Diego",
+      "State": "CA",
+      "Zip": "92101",
+      "Country": "USA",
+      "Phone": "555-0108",
+      "Company": "Theta Co.",
+      "Position": "Director",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 10,
+      "Name": "Laura Martinez",
+      "Email": "laura.martinez@example.com",
+      "Address": "606 Walnut St",
+      "City": "Dallas",
+      "State": "TX",
+      "Zip": "75201",
+      "Country": "USA",
+      "Phone": "555-0109",
+      "Company": "Iota Corp",
+      "Position": "Supervisor",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 11,
+      "Name": "Linda Hernandez",
+      "Email": "linda.hernandez@example.com",
+      "Address": "808 Poplar Blvd",
+      "City": "Austin",
+      "State": "TX",
+      "Zip": "73301",
+      "Country": "USA",
+      "Phone": "555-0111",
+      "Company": "Lambda Inc.",
+      "Position": "Coordinator",
+      "Notes": "N/A"
+    },
+    {
+      "Index": 12,
+      "Name": "Emily Davis",
+      "Email": "emily.davis@example.com",
+      "Address": "202 Elm St",
+      "City": "Phoenix",
+      "State": "AZ",
+      "Zip": "85001",
+      "Country": "USA",
+      "Phone": "555-0105",
+      "Company": "Mu LLC",
+      "Position": "New",
+      "Notes": "N/A"
+    }  
+  ];
 
   // ------------------------------------------------
   // 2) DOM REFERENCES
@@ -930,7 +1078,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     const lowerSearch = searchString.toLowerCase();
     return allData.filter(row => {
-      // If any field (string) contains the search text
+      // If any field (string) includes the search text
       return Object.values(row).some(val => {
         if (typeof val === 'string') {
           return val.toLowerCase().includes(lowerSearch);
@@ -951,15 +1099,22 @@ document.addEventListener('DOMContentLoaded', function() {
   // 6) PAGINATION
   // ------------------------------------------------
   function displayPage() {
-    const filteredData = getFilteredData(); 
+    const filteredData = getFilteredData();
     const startIndex = (currentPage - 1) * rowsPerPage;
     const endIndex = Math.min(startIndex + rowsPerPage, filteredData.length);
     const pageData = filteredData.slice(startIndex, endIndex);
 
     tableBody.innerHTML = '';
     pageData.forEach((rowData, i) => {
-      const globalIndex = startIndex + i; // position in filteredData
+      // i is the index on this page; globalIndex is the index in the filtered set
+      const globalIndex = startIndex + i;
+
+      // Create a table row
       const row = document.createElement('tr');
+
+      // Store the row's "Index" as a data attribute, ignoring column order
+      // We parse it as a number so we can reorder by it
+      row.dataset.indexVal = parseInt(rowData.Index, 10);
 
       // Cell 0: Drag handle
       const tdDrag = document.createElement('td');
@@ -1012,11 +1167,13 @@ document.addEventListener('DOMContentLoaded', function() {
       columnsPref.forEach(col => {
         if (col.visible || col.name === "Index") {
           const cell = document.createElement('td');
-          cell.setAttribute('contenteditable', 'true');
+
+          // If this is the "Index" column, do NOT let the user edit it
           if (col.name === "Index") {
-            // Show row's position in the filtered set
-            cell.textContent = globalIndex + 1;
+            cell.setAttribute('contenteditable', 'false');
+            cell.textContent = globalIndex + 1; // position in the filtered set
           } else {
+            cell.setAttribute('contenteditable', 'true');
             cell.textContent = rowData[col.name] || '';
           }
           cell.addEventListener('input', () => row.classList.add('modified'));
@@ -1024,16 +1181,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
 
-      // Row drag & drop events
-      row.addEventListener('dragover', dragOver);
-      row.addEventListener('dragleave', dragLeave);
-      // We'll pass the entire rowData object so we know which item in allData to reorder
+      // Attach row-level drag & drop events from dragAndDrop.js
+      // (global functions: dragOver, dragLeave, drop)
+      row.addEventListener('dragover', e => dragOver(e));
+      row.addEventListener('dragleave', e => dragLeave(e));
       row.addEventListener('drop', e => drop(e, rowData));
 
       tableBody.appendChild(row);
     });
 
+    // After building rows, attach .drag-handle events from dragAndDrop.js
     attachRowDragEvents();
+
     updatePaginationUI(filteredData.length);
   }
 
@@ -1049,6 +1208,7 @@ document.addEventListener('DOMContentLoaded', function() {
     currentPage = 1;
     displayPage();
   });
+
   prevPageBtn.addEventListener('click', function() {
     if (currentPage > 1) {
       syncCurrentPageEdits();
@@ -1056,6 +1216,7 @@ document.addEventListener('DOMContentLoaded', function() {
       displayPage();
     }
   });
+
   nextPageBtn.addEventListener('click', function() {
     const filteredData = getFilteredData();
     const totalPages = Math.ceil(filteredData.length / rowsPerPage);
@@ -1088,75 +1249,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ------------------------------------------------
-  // 7) DRAG & DROP REORDERING
-  // ------------------------------------------------
-  let draggedRowElement = null;
-
-  function attachRowDragEvents() {
-    document.querySelectorAll('.drag-handle').forEach(handle => {
-      handle.addEventListener('dragstart', dragStart);
-      handle.addEventListener('dragend', dragEnd);
-    });
-  }
-
-  function dragStart(e) {
-    draggedRowElement = this.parentNode;
-    e.dataTransfer.effectAllowed = 'move';
-  }
-
-  function dragEnd() {
-    draggedRowElement = null;
-    clearDragOver();
-  }
-
-  function dragOver(e) {
-    e.preventDefault();
-    this.classList.add('drag-over');
-  }
-
-  function dragLeave() {
-    this.classList.remove('drag-over');
-  }
-
-  // Reorder allData by removing the dragged row and inserting it before/after the target
-  function drop(e, targetRowObj) {
-    e.preventDefault();
-    this.classList.remove('drag-over');
-    if (!draggedRowElement || draggedRowElement === this) return;
-
-    // Identify which row in allData is being dragged
-    // We'll parse the "Index" cell from the dragged row or store rowData
-    // For simplicity, parse from cell 3 (if columns haven't changed order).
-    const draggedIndexCell = draggedRowElement.cells[3];
-    if (!draggedIndexCell) return;
-    const draggedIndex = parseInt(draggedIndexCell.textContent) - 1;
-    const draggedObj = getFilteredData()[draggedIndex];
-    if (!draggedObj) return;
-
-    // Reorder in the global allData
-    const fromPos = allData.indexOf(draggedObj);
-    const toPos = allData.indexOf(targetRowObj);
-    if (fromPos < 0 || toPos < 0) return;
-
-    const rect = this.getBoundingClientRect();
-    const offset = e.clientY - rect.top;
-    const dropAbove = offset < rect.height / 2;
-
-    allData.splice(fromPos, 1);
-    let insertPos = dropAbove ? toPos : toPos + 1;
-    if (fromPos < toPos) insertPos--;
-    if (insertPos < 0) insertPos = 0;
-    if (insertPos > allData.length) insertPos = allData.length;
-    allData.splice(insertPos, 0, draggedObj);
-
-    displayPage();
-  }
-
-  function clearDragOver() {
-    document.querySelectorAll('tr').forEach(row => row.classList.remove('drag-over'));
-  }
-
-  // ------------------------------------------------
   // 8) SAVE & CANCEL
   // ------------------------------------------------
   saveBtn.addEventListener('click', saveChanges);
@@ -1181,7 +1273,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function cancelChanges() {
-    // Discard unsaved changes on current page
+    // Discard unsaved changes on the current page
     displayPage();
   }
 
@@ -1290,15 +1382,136 @@ document.addEventListener('DOMContentLoaded', function() {
   // ------------------------------------------------
   buildTableHeader();
 
-  // Load data from /data
+  // 1) Attempt to load data from /data
   Promise.resolve(inlineData)
-    .then(res => res.json())
-    .then(data => {
-      allData = data;
-      displayPage(); // Show the first page
+    .then(res => {
+      if (!res.ok) {
+        // If /data not found (404), fallback
+        throw new Error("No data.json found on server");
+      }
+      return res.json();
     })
-    .catch(err => console.error('Error loading data:', err));
+    .then(data => {
+      // If fetch succeeded, parse "Index"
+      data.forEach(d => {
+        d.Index = parseInt(d.Index, 10);
+      });
+      allData = data;
+      initDragAndDrop(allData, displayPage);
+      displayPage();
+    })
+    .catch(err => {
+      // If server data not found or error, fallback
+      console.warn("Using fallback data instead:", err);
+      fallbackData.forEach(d => {
+        d.Index = parseInt(d.Index, 10);
+      });
+      allData = fallbackData;
+      initDragAndDrop(allData, displayPage);
+      displayPage();
+    });
 });
+
+</script>
+  <script>
+// dragAndDrop.js
+
+// Global references to data & display function
+let allDataRef = null;
+let displayPageRef = null;
+
+/**
+ * Called once from script.js after data is loaded.
+ * @param {Array} dataArray - reference to allData
+ * @param {Function} displayFn - reference to displayPage
+ */
+function initDragAndDrop(dataArray, displayFn) {
+  allDataRef = dataArray;
+  displayPageRef = displayFn;
+}
+
+/**
+ * Attach dragstart/dragend to .drag-handle elements
+ */
+function attachRowDragEvents() {
+  document.querySelectorAll('.drag-handle').forEach(handle => {
+    handle.addEventListener('dragstart', dragStart);
+    handle.addEventListener('dragend', dragEnd);
+  });
+}
+
+// The row being dragged
+let draggedRowElement = null;
+
+function dragStart(e) {
+  draggedRowElement = this.parentNode;
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function dragEnd() {
+  draggedRowElement = null;
+  clearDragOver();
+}
+
+function dragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+}
+
+function dragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+
+/**
+ * drop(e, rowData) is triggered from script.js.
+ * We reorder allDataRef by matching "Index".
+ */
+function drop(e, targetRowObj) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (!draggedRowElement || draggedRowElement === e.currentTarget) return;
+
+  // Read the numeric "Index" from dataset
+  const draggedIndexNum = parseInt(draggedRowElement.dataset.indexVal, 10);
+  const targetIndexNum = parseInt(e.currentTarget.dataset.indexVal, 10);
+
+  const draggedObjPos = allDataRef.findIndex(x => x.Index === draggedIndexNum);
+  const targetObjPos = allDataRef.findIndex(x => x.Index === targetIndexNum);
+
+  if (draggedObjPos < 0 || targetObjPos < 0) {
+    console.error("Dragged or target object not found in allData");
+    return;
+  }
+
+  // Decide whether to drop above or below
+  const rect = e.currentTarget.getBoundingClientRect();
+  const offset = e.clientY - rect.top;
+  const dropAbove = offset < rect.height / 2;
+
+  const [draggedObj] = allDataRef.splice(draggedObjPos, 1);
+  let insertPos = dropAbove ? targetObjPos : targetObjPos + 1;
+  if (draggedObjPos < targetObjPos) {
+    insertPos--;
+  }
+  if (insertPos < 0) insertPos = 0;
+  if (insertPos > allDataRef.length) insertPos = allDataRef.length;
+
+  allDataRef.splice(insertPos, 0, draggedObj);
+
+  // Redisplay
+  displayPageRef();
+}
+
+function clearDragOver() {
+  document.querySelectorAll('tr').forEach(row => row.classList.remove('drag-over'));
+}
+
+// Expose globally
+window.initDragAndDrop = initDragAndDrop;
+window.attachRowDragEvents = attachRowDragEvents;
+window.dragOver = dragOver;
+window.dragLeave = dragLeave;
+window.drop = drop;
 
 </script>
 </body>
