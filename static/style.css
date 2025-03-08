@@ -1,27 +1,21 @@
-/* style.css using green/teal tones from the attached image */
-
-/* Approximate Brand Colors (extracted from the image):
-   - Primary Teal: #36C69F
-   - Dark Teal:    #2B7F6A
-   - Soft Background: #F2FBF7
-   - Light Modified Tint: #D0F0E5
-*/
-
+/* Global Styles */
 body {
-  background-color: #F2FBF7; /* Soft teal-tinged background */
+  background-color: #F2FBF7;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color: #2E2E2E;
   margin: 0;
   padding: 20px;
 }
 
-/* Table Layout */
+/* Table Styling */
 table {
   border-collapse: collapse;
   width: 100%;
   background: #FFFFFF;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 th, td {
@@ -31,63 +25,66 @@ th, td {
   font-size: 14px;
 }
 
-/* Table Header */
 th {
-  background-color: #36C69F; /* Primary teal */
+  background-color: #36C69F;
   color: #FFFFFF;
   font-weight: bold;
 }
 
-/* Row Hover & Transitions */
 tr {
   transition: background-color 0.3s ease;
 }
 
 tr:hover {
-  background-color: #f0f0f0;
+  background-color: #E8F7F3;  /* Lighter teal for better contrast */
 }
 
-/* Drag Handle */
 .drag-handle {
-  cursor: move;
+  cursor: grab;
   width: 30px;
   text-align: center;
   color: #888;
+  font-size: 18px;
 }
 
 .drag-handle:hover {
-  color: #555;
+  color: #2B7F6A;
 }
 
-/* Row highlight during drag-over */
-.drag-over {
-  background-color: #2B7F6A !important; /* Dark teal */
+.dragging {
+  background-color: #2B7F6A !important;
   color: #FFFFFF;
 }
 
-/* Modified Row Tint */
+/* Modified Rows */
 .modified {
-  background-color: #D0F0E5 !important; /* Light teal tint */
+  background-color: #D0F0E5 !important;
 }
 
-/* Buttons: Dark teal by default, lighter teal on hover */
+/* Button Styling */
 button {
-  background-color: #2B7F6A; /* Dark teal */
+  background-color: #2B7F6A;
   color: #FFFFFF;
   border: none;
-  padding: 8px 12px;
+  padding: 8px 14px;
   margin: 5px;
   border-radius: 4px;
   font-size: 14px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 button:hover {
-  background-color: #36C69F; /* Lighter teal on hover */
+  background-color: #36C69F;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* Inputs & Selects */
+button:disabled {
+  background-color: #9E9E9E;
+  cursor: not-allowed;
+}
+
+/* Input Fields */
 input[type="text"],
 select {
   padding: 6px 10px;
@@ -97,63 +94,76 @@ select {
   margin-right: 5px;
 }
 
-/* Modal Overlay */
+input:focus,
+select:focus {
+  outline: 2px solid #2B7F6A;
+  border-color: #36C69F;
+}
+
+/* Pagination Buttons */
+#prevPageBtn, #nextPageBtn {
+  background-color: #2B7F6A;
+  border-radius: 50px;
+  padding: 6px 12px;
+}
+
+#prevPageBtn:hover, #nextPageBtn:hover {
+  background-color: #36C69F;
+}
+
+/* Column Preferences Modal */
 .modal {
   display: none;
   position: fixed;
   z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0, 0, 0, 0.4);
-}
-
-/* Modal Content */
-.modal-content {
-  background-color: #FFFFFF;
-  margin: 10% auto;
-  padding: 20px;
-  border: 1px solid #888;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   width: 300px;
+  background: #FFFFFF;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  padding: 20px;
 }
 
-/* Modal Close Button */
+.modal-content {
+  text-align: center;
+}
+
 .close {
-  color: #aaaaaa;
   float: right;
-  font-size: 24px;
-  font-weight: bold;
+  font-size: 20px;
   cursor: pointer;
+  color: #888;
 }
 
-.close:hover,
-.close:focus {
-  color: #2B7F6A;
-  text-decoration: none;
+.close:hover {
+  color: #555;
 }
 
-/* Column Preferences List */
-#columnPrefsList {
-  list-style: none;
-  padding: 0;
-  margin: 10px 0;
+/* Checkbox in Header */
+#selectAllCheckbox {
+  cursor: pointer;
+  transform: scale(1.2);
 }
 
-.pref-item {
-  border: 1px solid #dddddd;
-  padding: 8px;
-  margin-bottom: 5px;
-  display: flex;
-  align-items: center;
-  background: #f9f9f9;
-  border-radius: 4px;
-  cursor: move;
+/* Responsive Design */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  table {
+    font-size: 12px;
+  }
+
+  th, td {
+    padding: 10px;
+  }
+
+  button {
+    padding: 6px 10px;
+  }
 }
 
-.pref-item span {
-  margin-left: 8px;
-}
+

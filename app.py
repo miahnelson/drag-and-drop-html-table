@@ -1,9 +1,6 @@
 from flask import Flask, render_template, jsonify, request
 import json
 import os
-from dotenv import load_dotenv
-
-load_dotenv()  # Load environment variables from .env
 
 app = Flask(__name__)
 
@@ -13,7 +10,6 @@ def index():
 
 @app.route('/data')
 def data():
-    # Load test data from the static folder
     data_path = os.path.join(app.static_folder, 'data.json')
     with open(data_path) as f:
         data = json.load(f)

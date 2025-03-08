@@ -7,42 +7,51 @@
 </head>
 <body>
 
-  <!-- Top bar: Bulk edit on the left, columns/save/cancel on the right -->
+  <!-- Top Bar: Pagination, Search, Column Preferences, Save & Cancel -->
   <div id="topBar" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-    <!-- Bulk Edit Controls (left side) -->
-    <div id="bulkEditSection" style="display: flex; align-items: center; gap: 8px;">
-      <label for="bulkColumn">Bulk Edit Column:</label>
-      <select id="bulkColumn">
-        <!-- Do not include "Index" in bulk edit -->
-        <option value="Name">Name</option>
-        <option value="Email">Email</option>
-        <option value="Address">Address</option>
-        <option value="City">City</option>
-        <option value="State">State</option>
-        <option value="Zip">Zip</option>
-        <option value="Country">Country</option>
-        <option value="Phone">Phone</option>
-        <option value="Company">Company</option>
-        <option value="Position">Position</option>
-        <option value="Notes">Notes</option>
+    
+    <!-- Left Section: Pagination + Search -->
+    <div id="leftSection" style="display: flex; align-items: center; gap: 12px;">
+      
+      <!-- Search Input -->
+      <label for="searchInput">Search:</label>
+      <input type="text" id="searchInput" placeholder="Type to filter..." aria-label="Search Table">
+
+      <!-- Rows Per Page Dropdown -->
+      <label for="rowsPerPageSelect">Rows per page:</label>
+      <select id="rowsPerPageSelect">
+        <option value="20" selected>20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="200">200</option>
       </select>
-      <label for="bulkValue">Value:</label>
-      <input type="text" id="bulkValue" />
-      <button id="applyBulkEditBtn">Apply to Selected Rows</button>
+
+      <!-- Pagination Buttons -->
+      <button id="prevPageBtn" aria-label="Previous Page">Prev</button>
+      <span id="pageInfo"></span>
+      <button id="nextPageBtn" aria-label="Next Page">Next</button>
     </div>
 
-    <!-- Column Preferences, Save, Cancel (right side) -->
-    <div id="buttonsSection" style="display: flex; align-items: center; gap: 8px;">
+    <!-- Right Section: Column Preferences, Save, Cancel -->
+    <div id="buttonsSection" style="display: flex; align-items: center; gap: 12px;">
       <button id="columnPrefsBtn" title="Column Preferences">⚙️ Columns</button>
       <button id="saveBtn">Save</button>
       <button id="cancelBtn">Cancel</button>
     </div>
+
   </div>
 
-  <!-- Table -->
-  <table>
-    <thead id="tableHeader"></thead>
-    <tbody id="tableBody"></tbody>
+  <!-- Editable & Draggable Table -->
+  <table id="editableTable">
+    <thead id="tableHeader">
+      <tr>
+        <th><input type="checkbox" id="selectAllCheckbox" title="Select All"></th>
+        <!-- Dynamic Columns Will Be Injected Here -->
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      <!-- Table Data Will Be Dynamically Populated -->
+    </tbody>
   </table>
 
   <!-- Column Preferences Modal -->
@@ -51,7 +60,7 @@
       <span class="close">&times;</span>
       <h2>Column Preferences</h2>
       <ul id="columnPrefsList">
-        <!-- Modal list items injected by script.js -->
+        <!-- Dynamic Column Options -->
       </ul>
       <button id="savePrefsBtn">Save Preferences</button>
       <button id="cancelPrefsBtn">Cancel</button>
