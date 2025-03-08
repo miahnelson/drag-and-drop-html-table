@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     const lowerSearch = searchString.toLowerCase();
     return allData.filter(row => {
-      // If any field (string) contains the search text
+      // If any field (string) includes the search text
       return Object.values(row).some(val => {
         if (typeof val === 'string') {
           return val.toLowerCase().includes(lowerSearch);
@@ -146,15 +146,22 @@ document.addEventListener('DOMContentLoaded', function() {
   // 6) PAGINATION
   // ------------------------------------------------
   function displayPage() {
-    const filteredData = getFilteredData(); 
+    const filteredData = getFilteredData();
     const startIndex = (currentPage - 1) * rowsPerPage;
     const endIndex = Math.min(startIndex + rowsPerPage, filteredData.length);
     const pageData = filteredData.slice(startIndex, endIndex);
 
     tableBody.innerHTML = '';
     pageData.forEach((rowData, i) => {
-      const globalIndex = startIndex + i; // position in filteredData
+      // i is the index on this page; globalIndex is the index in the filtered set
+      const globalIndex = startIndex + i;
+
+      // Create a table row
       const row = document.createElement('tr');
+
+      // Store the row's "Index" as a data attribute, ignoring column order
+      // We parse it as a number so we can reorder by it
+      row.dataset.indexVal = parseInt(rowData.Index, 10);
 
       // Cell 0: Drag handle
       const tdDrag = document.createElement('td');
@@ -207,11 +214,13 @@ document.addEventListener('DOMContentLoaded', function() {
       columnsPref.forEach(col => {
         if (col.visible || col.name === "Index") {
           const cell = document.createElement('td');
-          cell.setAttribute('contenteditable', 'true');
+
+          // If this is the "Index" column, do NOT let the user edit it
           if (col.name === "Index") {
-            // Show row's position in the filtered set
-            cell.textContent = globalIndex + 1;
+            cell.setAttribute('contenteditable', 'false');
+            cell.textContent = globalIndex + 1; // position in the filtered set
           } else {
+            cell.setAttribute('contenteditable', 'true');
             cell.textContent = rowData[col.name] || '';
           }
           cell.addEventListener('input', () => row.classList.add('modified'));
@@ -219,16 +228,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
 
-      // Row drag & drop events
-      row.addEventListener('dragover', dragOver);
-      row.addEventListener('dragleave', dragLeave);
-      // We'll pass the entire rowData object so we know which item in allData to reorder
+      // Attach row-level drag & drop events from dragAndDrop.js
+      // (global functions: dragOver, dragLeave, drop)
+      row.addEventListener('dragover', e => dragOver(e));
+      row.addEventListener('dragleave', e => dragLeave(e));
       row.addEventListener('drop', e => drop(e, rowData));
 
       tableBody.appendChild(row);
     });
 
+    // After building rows, attach .drag-handle events from dragAndDrop.js
     attachRowDragEvents();
+
     updatePaginationUI(filteredData.length);
   }
 
@@ -244,6 +255,7 @@ document.addEventListener('DOMContentLoaded', function() {
     currentPage = 1;
     displayPage();
   });
+
   prevPageBtn.addEventListener('click', function() {
     if (currentPage > 1) {
       syncCurrentPageEdits();
@@ -251,6 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
       displayPage();
     }
   });
+
   nextPageBtn.addEventListener('click', function() {
     const filteredData = getFilteredData();
     const totalPages = Math.ceil(filteredData.length / rowsPerPage);
@@ -283,75 +296,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // ------------------------------------------------
-  // 7) DRAG & DROP REORDERING
-  // ------------------------------------------------
-  let draggedRowElement = null;
-
-  function attachRowDragEvents() {
-    document.querySelectorAll('.drag-handle').forEach(handle => {
-      handle.addEventListener('dragstart', dragStart);
-      handle.addEventListener('dragend', dragEnd);
-    });
-  }
-
-  function dragStart(e) {
-    draggedRowElement = this.parentNode;
-    e.dataTransfer.effectAllowed = 'move';
-  }
-
-  function dragEnd() {
-    draggedRowElement = null;
-    clearDragOver();
-  }
-
-  function dragOver(e) {
-    e.preventDefault();
-    this.classList.add('drag-over');
-  }
-
-  function dragLeave() {
-    this.classList.remove('drag-over');
-  }
-
-  // Reorder allData by removing the dragged row and inserting it before/after the target
-  function drop(e, targetRowObj) {
-    e.preventDefault();
-    this.classList.remove('drag-over');
-    if (!draggedRowElement || draggedRowElement === this) return;
-
-    // Identify which row in allData is being dragged
-    // We'll parse the "Index" cell from the dragged row or store rowData
-    // For simplicity, parse from cell 3 (if columns haven't changed order).
-    const draggedIndexCell = draggedRowElement.cells[3];
-    if (!draggedIndexCell) return;
-    const draggedIndex = parseInt(draggedIndexCell.textContent) - 1;
-    const draggedObj = getFilteredData()[draggedIndex];
-    if (!draggedObj) return;
-
-    // Reorder in the global allData
-    const fromPos = allData.indexOf(draggedObj);
-    const toPos = allData.indexOf(targetRowObj);
-    if (fromPos < 0 || toPos < 0) return;
-
-    const rect = this.getBoundingClientRect();
-    const offset = e.clientY - rect.top;
-    const dropAbove = offset < rect.height / 2;
-
-    allData.splice(fromPos, 1);
-    let insertPos = dropAbove ? toPos : toPos + 1;
-    if (fromPos < toPos) insertPos--;
-    if (insertPos < 0) insertPos = 0;
-    if (insertPos > allData.length) insertPos = allData.length;
-    allData.splice(insertPos, 0, draggedObj);
-
-    displayPage();
-  }
-
-  function clearDragOver() {
-    document.querySelectorAll('tr').forEach(row => row.classList.remove('drag-over'));
-  }
-
-  // ------------------------------------------------
   // 8) SAVE & CANCEL
   // ------------------------------------------------
   saveBtn.addEventListener('click', saveChanges);
@@ -376,7 +320,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function cancelChanges() {
-    // Discard unsaved changes on current page
+    // Discard unsaved changes on the current page
     displayPage();
   }
 
@@ -485,12 +429,23 @@ document.addEventListener('DOMContentLoaded', function() {
   // ------------------------------------------------
   buildTableHeader();
 
-  // Load data from /data
+  // 1) Load data from /data
   fetch('/data')
     .then(res => res.json())
     .then(data => {
+      // 2) We do NOT need an "id" field in JSON. We rely on "Index".
+      //    Just parse it if it's a string:
+      data.forEach(d => {
+        d.Index = parseInt(d.Index, 10);
+      });
       allData = data;
-      displayPage(); // Show the first page
+
+      // 3) Initialize the drag-and-drop code from dragAndDrop.js
+      //    providing references if needed:
+      initDragAndDrop(allData, displayPage);
+
+      // 4) Show the first page
+      displayPage();
     })
     .catch(err => console.error('Error loading data:', err));
 });

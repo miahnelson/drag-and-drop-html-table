@@ -67,6 +67,10 @@
     </div>
   </div>
 
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <!-- Load script.js first -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <!-- Then load dragAndDrop.js so it can attach to the global scope -->
+    <script src="{{ url_for('static', filename='dragAndDrop.js') }}"></script>
 </body>
 </html>

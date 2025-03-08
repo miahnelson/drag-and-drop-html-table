@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Editable, Draggable & Bulk Editable Table</title>
+  <style>
+/* Global Styles */
+body {
+  background-color: #F2FBF7;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: #2E2E2E;
+  margin: 0;
+  padding: 20px;
+}
+
+/* Table Styling */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  background: #FFFFFF;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th, td {
+  border: 1px solid #dddddd;
+  padding: 12px 15px;
+  text-align: left;
+  font-size: 14px;
+}
+
+th {
+  background-color: #36C69F;
+  color: #FFFFFF;
+  font-weight: bold;
+}
+
+tr {
+  transition: background-color 0.3s ease;
+}
+
+tr:hover {
+  background-color: #E8F7F3;  /* Lighter teal for better contrast */
+}
+
+.drag-handle {
+  cursor: grab;
+  width: 30px;
+  text-align: center;
+  color: #888;
+  font-size: 18px;
+}
+
+.drag-handle:hover {
+  color: #2B7F6A;
+}
+
+.dragging {
+  background-color: #2B7F6A !important;
+  color: #FFFFFF;
+}
+
+/* Modified Rows */
+.modified {
+  background-color: #D0F0E5 !important;
+}
+
+/* Button Styling */
+button {
+  background-color: #2B7F6A;
+  color: #FFFFFF;
+  border: none;
+  padding: 8px 14px;
+  margin: 5px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background-color: #36C69F;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+button:disabled {
+  background-color: #9E9E9E;
+  cursor: not-allowed;
+}
+
+/* Input Fields */
+input[type="text"],
+select {
+  padding: 6px 10px;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-right: 5px;
+}
+
+input:focus,
+select:focus {
+  outline: 2px solid #2B7F6A;
+  border-color: #36C69F;
+}
+
+/* Pagination Buttons */
+#prevPageBtn, #nextPageBtn {
+  background-color: #2B7F6A;
+  border-radius: 50px;
+  padding: 6px 12px;
+}
+
+#prevPageBtn:hover, #nextPageBtn:hover {
+  background-color: #36C69F;
+}
+
+/* Column Preferences Modal */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  background: #FFFFFF;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.modal-content {
+  text-align: center;
+}
+
+.close {
+  float: right;
+  font-size: 20px;
+  cursor: pointer;
+  color: #888;
+}
+
+.close:hover {
+  color: #555;
+}
+
+/* Checkbox in Header */
+#selectAllCheckbox {
+  cursor: pointer;
+  transform: scale(1.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  table {
+    font-size: 12px;
+  }
+
+  th, td {
+    padding: 10px;
+  }
+
+  button {
+    padding: 6px 10px;
+  }
+}
+
+
+
+</style>
+</head>
+<body>
+
+  <!-- Top Bar: Pagination, Search, Column Preferences, Save & Cancel -->
+  <div id="topBar" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+    
+    <!-- Left Section: Pagination + Search -->
+    <div id="leftSection" style="display: flex; align-items: center; gap: 12px;">
+      
+      <!-- Search Input -->
+      <label for="searchInput">Search:</label>
+      <input type="text" id="searchInput" placeholder="Type to filter..." aria-label="Search Table">
+
+      <!-- Rows Per Page Dropdown -->
+      <label for="rowsPerPageSelect">Rows per page:</label>
+      <select id="rowsPerPageSelect">
+        <option value="20" selected>20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="200">200</option>
+      </select>
+
+      <!-- Pagination Buttons -->
+      <button id="prevPageBtn" aria-label="Previous Page">Prev</button>
+      <span id="pageInfo"></span>
+      <button id="nextPageBtn" aria-label="Next Page">Next</button>
+    </div>
+
+    <!-- Right Section: Column Preferences, Save, Cancel -->
+    <div id="buttonsSection" style="display: flex; align-items: center; gap: 12px;">
+      <button id="columnPrefsBtn" title="Column Preferences">⚙️ Columns</button>
+      <button id="saveBtn">Save</button>
+      <button id="cancelBtn">Cancel</button>
+    </div>
+
+  </div>
+
+  <!-- Editable & Draggable Table -->
+  <table id="editableTable">
+    <thead id="tableHeader">
+      <tr>
+        <th><input type="checkbox" id="selectAllCheckbox" title="Select All"></th>
+        <!-- Dynamic Columns Will Be Injected Here -->
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      <!-- Table Data Will Be Dynamically Populated -->
+    </tbody>
+  </table>
+
+  <!-- Column Preferences Modal -->
+  <div id="columnPrefsModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Column Preferences</h2>
+      <ul id="columnPrefsList">
+        <!-- Dynamic Column Options -->
+      </ul>
+      <button id="savePrefsBtn">Save Preferences</button>
+      <button id="cancelPrefsBtn">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+var inlineData = [
+  {
+    "Address": "123 Main St",
+    "City": "New York",
+    "Company": "Acme Inc.",
+    "Country": "USA",
+    "Email": "john.doe@example.com",
+    "Index": "1",
+    "Name": "John Doe",
+    "Notes": "N/A",
+    "Phone": "555-0101",
+    "Position": "Manager",
+    "State": "NY",
+    "Zip": "10001"
+  },
+  {
+    "Address": "456 Oak Ave",
+    "City": "Los Angeles",
+    "Company": "Beta Corp",
+    "Country": "USA",
+    "Email": "jane.smith@example.com",
+    "Index": "2",
+    "Name": "Jane Smith",
+    "Notes": "N/A",
+    "Phone": "555-0102",
+    "Position": "Engineer",
+    "State": "CA",
+    "Zip": "90001"
+  },
+  {
+    "Address": "333 Oak St",
+    "City": "Charlotte",
+    "Company": "Omicron LLC",
+    "Country": "USA",
+    "Email": "barbara.clark@example.com",
+    "Index": "3",
+    "Name": "Barbara Clark",
+    "Notes": "N/A",
+    "Phone": "555-0115",
+    "Position": "Coordinator",
+    "State": "NC",
+    "Zip": "28202"
+  },
+  {
+    "Address": "101 Maple St",
+    "City": "Chicago",
+    "Company": "Delta Co.",
+    "Country": "USA",
+    "Email": "robert.brown@example.com",
+    "Index": "4",
+    "Name": "Robert Brown",
+    "Notes": "N/A",
+    "Phone": "555-0104",
+    "Position": "Analyst",
+    "State": "TX",
+    "Zip": "77001"
+  },
+  {
+    "Address": "sdgvasdfbg",
+    "City": "Chicago",
+    "Company": "Kappa Corp",
+    "Country": "USA",
+    "Email": "james.rodriguez@example.com",
+    "Index": "5",
+    "Name": "James Rodriguez",
+    "Notes": "N/A",
+    "Phone": "555-0110",
+    "Position": "Manager",
+    "State": "CA",
+    "Zip": "95101"
+  },
+  {
+    "Address": "789 Pine Rd",
+    "City": "Chicago",
+    "Company": "Gamma LLC",
+    "Country": "USA",
+    "Email": "alice.johnson@example.com",
+    "Index": "6",
+    "Name": "Jeremiah",
+    "Notes": "N/A",
+    "Phone": "555-0103",
+    "Position": "Designer",
+    "State": "IL",
+    "Zip": "60601"
+  },
+  {
+    "Address": "303 Cedar Rd",
+    "City": "Philadelphia",
+    "Company": "Zeta Ltd.",
+    "Country": "USA",
+    "Email": "michael.wilson@example.com",
+    "Index": "7",
+    "Name": "Jeremiah",
+    "Notes": "N/A",
+    "Phone": "555-0106",
+    "Position": "Developer",
+    "State": "PA",
+    "Zip": "19019"
+  },
+  {
+    "Address": "404 Birch Ln",
+    "City": "San Antonio",
+    "Company": "Eta LLC",
+    "Country": "USA",
+    "Email": "sarah.miller@example.com",
+    "Index": "8",
+    "Name": "Sarah Miller",
+    "Notes": "N/A",
+    "Phone": "555-0107",
+    "Position": "New",
+    "State": "TX",
+    "Zip": "78201"
+  },
+  {
+    "Address": "505 Spruce Ave",
+    "City": "San Diego",
+    "Company": "Theta Inc.",
+    "Country": "USA",
+    "Email": "david.garcia@example.com",
+    "Index": "9",
+    "Name": "David Garcia",
+    "Notes": "N/A",
+    "Phone": "555-0108",
+    "Position": "Director",
+    "State": "CA",
+    "Zip": "92101"
+  },
+  {
+    "Address": "606 Walnut St",
+    "City": "Chicago",
+    "Company": "Iota Co.",
+    "Country": "USA",
+    "Email": "laura.martinez@example.com",
+    "Index": "10",
+    "Name": "Laura Martinez",
+    "Notes": "N/A",
+    "Phone": "555-0109",
+    "Position": "Supervisor",
+    "State": "TX",
+    "Zip": "75201"
+  },
+  {
+    "Address": "808 Poplar Blvd",
+    "City": "Austin",
+    "Company": "Lambda Inc.",
+    "Country": "USA",
+    "Email": "linda.hernandez@example.com",
+    "Index": "11",
+    "Name": "Linda Hernandez",
+    "Notes": "N/A",
+    "Phone": "555-0111",
+    "Position": "Jeremiah",
+    "State": "TX",
+    "Zip": "73301"
+  },
+  {
+    "Address": "202 Elm St",
+    "City": "Phoenix",
+    "Company": "Epsilon Inc.",
+    "Country": "USA",
+    "Email": "emily.davis@example.com",
+    "Index": "12",
+    "Name": "Emily Davis",
+    "Notes": "N/A",
+    "Phone": "555-0105",
+    "Position": "New",
+    "State": "AZ",
+    "Zip": "85001"
+  },
+  {
+    "Address": "909 Fir St",
+    "City": "Jacksonville",
+    "Company": "Mu LLC",
+    "Country": "USA",
+    "Email": "steven.lee@example.com",
+    "Index": "13",
+    "Name": "Steven Lee",
+    "Notes": "N/A",
+    "Phone": "555-0112",
+    "Position": "Engineer",
+    "State": "FL",
+    "Zip": "32099"
+  },
+  {
+    "Address": "111 Cherry Ave",
+    "City": "Fort Worth",
+    "Company": "Nu Corp",
+    "Country": "USA",
+    "Email": "patricia.white@example.com",
+    "Index": "14",
+    "Name": "Patricia White",
+    "Notes": "N/A",
+    "Phone": "555-0113",
+    "Position": "Designer",
+    "State": "TX",
+    "Zip": "76101"
+  },
+  {
+    "Address": "222 Pine St",
+    "City": "Columbus",
+    "Company": "Xi Inc.",
+    "Country": "USA",
+    "Email": "chris.harris@example.com",
+    "Index": "15",
+    "Name": "Christopher Harris",
+    "Notes": "N/A",
+    "Phone": "555-0114",
+    "Position": "Developer",
+    "State": "OH",
+    "Zip": "43085"
+  },
+  {
+    "Address": "444 Maple Ave",
+    "City": "Detroit",
+    "Company": "Pi Co.",
+    "Country": "USA",
+    "Email": "daniel.lewis@example.com",
+    "Index": "16",
+    "Name": "Daniel Lewis",
+    "Notes": "N/A",
+    "Phone": "555-0116",
+    "Position": "Supervisor",
+    "State": "MI",
+    "Zip": "48201"
+  },
+  {
+    "Address": "555 Elm St",
+    "City": "Memphis",
+    "Company": "Rho Corp",
+    "Country": "USA",
+    "Email": "susan.robinson@example.com",
+    "Index": "17",
+    "Name": "Susan Robinson",
+    "Notes": "N/A",
+    "Phone": "555-0117",
+    "Position": "Manager",
+    "State": "TN",
+    "Zip": "37501"
+  },
+  {
+    "Address": "666 Cedar Rd",
+    "City": "Boston",
+    "Company": "Sigma Inc.",
+    "Country": "USA",
+    "Email": "paul.walker@example.com",
+    "Index": "18",
+    "Name": "Paul Walker",
+    "Notes": "N/A",
+    "Phone": "555-0118",
+    "Position": "Analyst",
+    "State": "MA",
+    "Zip": "02108"
+  },
+  {
+    "Address": "777 Birch Ln",
+    "City": "Seattle",
+    "Company": "Tau LLC",
+    "Country": "USA",
+    "Email": "karen.hall@example.com",
+    "Index": "19",
+    "Name": "Karen Hall",
+    "Notes": "N/A",
+    "Phone": "555-0119",
+    "Position": "Engineer",
+    "State": "WA",
+    "Zip": "98101"
+  },
+  {
+    "Address": "888 Spruce Ave",
+    "City": "Denver",
+    "Company": "Upsilon Co.",
+    "Country": "USA",
+    "Email": "mark.young@example.com",
+    "Index": "20",
+    "Name": "Mark Young",
+    "Notes": "N/A",
+    "Phone": "555-0120",
+    "Position": "Director",
+    "State": "CO",
+    "Zip": "80201"
+  },
+  {
+    "Address": "123 Main St",
+    "City": "New York",
+    "Company": "Acme Inc.",
+    "Country": "USA",
+    "Email": "john.doe@example.com",
+    "Index": "1",
+    "Name": "John Doe",
+    "Notes": "N/A",
+    "Phone": "555-0101",
+    "Position": "Manager",
+    "State": "NY",
+    "Zip": "10001"
+  },
+  {
+    "Address": "456 Oak Ave",
+    "City": "Los Angeles",
+    "Company": "Beta Corp",
+    "Country": "USA",
+    "Email": "jane.smith@example.com",
+    "Index": "2",
+    "Name": "Jane Smith",
+    "Notes": "N/A",
+    "Phone": "555-0102",
+    "Position": "Engineer",
+    "State": "CA",
+    "Zip": "90001"
+  },
+  {
+    "Address": "333 Oak St",
+    "City": "Charlotte",
+    "Company": "Omicron LLC",
+    "Country": "USA",
+    "Email": "barbara.clark@example.com",
+    "Index": "3",
+    "Name": "Barbara Clark",
+    "Notes": "N/A",
+    "Phone": "555-0115",
+    "Position": "Coordinator",
+    "State": "NC",
+    "Zip": "28202"
+  },
+  {
+    "Address": "101 Maple St",
+    "City": "Chicago",
+    "Company": "Delta Co.",
+    "Country": "USA",
+    "Email": "robert.brown@example.com",
+    "Index": "4",
+    "Name": "Robert Brown",
+    "Notes": "N/A",
+    "Phone": "555-0104",
+    "Position": "Analyst",
+    "State": "TX",
+    "Zip": "77001"
+  },
+  {
+    "Address": "707 Aspen Dr",
+    "City": "Chicago",
+    "Company": "Kappa Corp",
+    "Country": "USA",
+    "Email": "james.rodriguez@example.com",
+    "Index": "5",
+    "Name": "James Rodriguez",
+    "Notes": "N/A",
+    "Phone": "555-0110",
+    "Position": "Manager",
+    "State": "CA",
+    "Zip": "95101"
+  },
+  {
+    "Address": "789 Pine Rd",
+    "City": "Chicago",
+    "Company": "Gamma LLC",
+    "Country": "USA",
+    "Email": "alice.johnson@example.com",
+    "Index": "6",
+    "Name": "Jeremiah",
+    "Notes": "N/A",
+    "Phone": "555-0103",
+    "Position": "Designer",
+    "State": "IL",
+    "Zip": "60601"
+  },
+  {
+    "Address": "303 Cedar Rd",
+    "City": "Philadelphia",
+    "Company": "Zeta Ltd.",
+    "Country": "USA",
+    "Email": "michael.wilson@example.com",
+    "Index": "7",
+    "Name": "Jeremiah",
+    "Notes": "N/A",
+    "Phone": "555-0106",
+    "Position": "Developer",
+    "State": "PA",
+    "Zip": "19019"
+  },
+  {
+    "Address": "404 Birch Ln",
+    "City": "San Antonio",
+    "Company": "Eta LLC",
+    "Country": "USA",
+    "Email": "sarah.miller@example.com",
+    "Index": "8",
+    "Name": "Sarah Miller",
+    "Notes": "N/A",
+    "Phone": "555-0107",
+    "Position": "New",
+    "State": "TX",
+    "Zip": "78201"
+  },
+  {
+    "Address": "505 Spruce Ave",
+    "City": "San Diego",
+    "Company": "Theta Inc.",
+    "Country": "USA",
+    "Email": "david.garcia@example.com",
+    "Index": "9",
+    "Name": "David Garcia",
+    "Notes": "N/A",
+    "Phone": "555-0108",
+    "Position": "Director",
+    "State": "CA",
+    "Zip": "92101"
+  },
+  {
+    "Address": "606 Walnut St",
+    "City": "Chicago",
+    "Company": "Iota Co.",
+    "Country": "USA",
+    "Email": "laura.martinez@example.com",
+    "Index": "10",
+    "Name": "Laura Martinez",
+    "Notes": "N/A",
+    "Phone": "555-0109",
+    "Position": "Supervisor",
+    "State": "TX",
+    "Zip": "75201"
+  },
+  {
+    "Address": "808 Poplar Blvd",
+    "City": "Austin",
+    "Company": "Lambda Inc.",
+    "Country": "USA",
+    "Email": "linda.hernandez@example.com",
+    "Index": "11",
+    "Name": "Linda Hernandez",
+    "Notes": "N/A",
+    "Phone": "555-0111",
+    "Position": "Jeremiah",
+    "State": "TX",
+    "Zip": "73301"
+  },
+  {
+    "Address": "202 Elm St",
+    "City": "Phoenix",
+    "Company": "Epsilon Inc.",
+    "Country": "USA",
+    "Email": "emily.davis@example.com",
+    "Index": "12",
+    "Name": "Emily Davis",
+    "Notes": "N/A",
+    "Phone": "555-0105",
+    "Position": "New",
+    "State": "AZ",
+    "Zip": "85001"
+  },
+  {
+    "Address": "909 Fir St",
+    "City": "Jacksonville",
+    "Company": "Mu LLC",
+    "Country": "USA",
+    "Email": "steven.lee@example.com",
+    "Index": "13",
+    "Name": "Steven Lee",
+    "Notes": "N/A",
+    "Phone": "555-0112",
+    "Position": "Engineer",
+    "State": "FL",
+    "Zip": "32099"
+  },
+  {
+    "Address": "111 Cherry Ave",
+    "City": "Fort Worth",
+    "Company": "Nu Corp",
+    "Country": "USA",
+    "Email": "patricia.white@example.com",
+    "Index": "14",
+    "Name": "Patricia White",
+    "Notes": "N/A",
+    "Phone": "555-0113",
+    "Position": "Designer",
+    "State": "TX",
+    "Zip": "76101"
+  },
+  {
+    "Address": "222 Pine St",
+    "City": "Columbus",
+    "Company": "Xi Inc.",
+    "Country": "USA",
+    "Email": "chris.harris@example.com",
+    "Index": "15",
+    "Name": "Christopher Harris",
+    "Notes": "N/A",
+    "Phone": "555-0114",
+    "Position": "Developer",
+    "State": "OH",
+    "Zip": "43085"
+  },
+  {
+    "Address": "444 Maple Ave",
+    "City": "Detroit",
+    "Company": "Pi Co.",
+    "Country": "USA",
+    "Email": "daniel.lewis@example.com",
+    "Index": "16",
+    "Name": "Daniel Lewis",
+    "Notes": "N/A",
+    "Phone": "555-0116",
+    "Position": "Supervisor",
+    "State": "MI",
+    "Zip": "48201"
+  },
+  {
+    "Address": "555 Elm St",
+    "City": "Memphis",
+    "Company": "Rho Corp",
+    "Country": "USA",
+    "Email": "susan.robinson@example.com",
+    "Index": "17",
+    "Name": "Susan Robinson",
+    "Notes": "N/A",
+    "Phone": "555-0117",
+    "Position": "Manager",
+    "State": "TN",
+    "Zip": "37501"
+  },
+  {
+    "Address": "666 Cedar Rd",
+    "City": "Boston",
+    "Company": "Sigma Inc.",
+    "Country": "USA",
+    "Email": "paul.walker@example.com",
+    "Index": "18",
+    "Name": "Paul Walker",
+    "Notes": "N/A",
+    "Phone": "555-0118",
+    "Position": "Analyst",
+    "State": "MA",
+    "Zip": "02108"
+  },
+  {
+    "Address": "777 Birch Ln",
+    "City": "Seattle",
+    "Company": "Tau LLC",
+    "Country": "USA",
+    "Email": "karen.hall@example.com",
+    "Index": "19",
+    "Name": "Karen Hall",
+    "Notes": "N/A",
+    "Phone": "555-0119",
+    "Position": "Engineer",
+    "State": "WA",
+    "Zip": "98101"
+  },
+  {
+    "Address": "888 Spruce Ave",
+    "City": "Denver",
+    "Company": "Upsilon Co.",
+    "Country": "USA",
+    "Email": "mark.young@example.com",
+    "Index": "20",
+    "Name": "Mark Young",
+    "Notes": "N/A",
+    "Phone": "555-0120",
+    "Position": "Director",
+    "State": "CO",
+    "Zip": "80201"
+  }
+];
+</script>
+<script>
+// script.js
+document.addEventListener('DOMContentLoaded', function() {
+  // ------------------------------------------------
+  // 1) STATE: Data, Pagination, Columns, Search
+  // ------------------------------------------------
+  let allData = [];           // All rows loaded from /data
+  let currentPage = 1;        // Current page
+  let rowsPerPage = 20;       // Default rows per page
+  let searchString = "";      // Current text filter
+
+  // Column preferences (Index is always forced visible)
+  const defaultColumns = [
+    { name: "Index", visible: true },
+    { name: "Name", visible: true },
+    { name: "Email", visible: true },
+    { name: "Address", visible: true },
+    { name: "City", visible: true },
+    { name: "State", visible: true },
+    { name: "Zip", visible: true },
+    { name: "Country", visible: true },
+    { name: "Phone", visible: true },
+    { name: "Company", visible: true },
+    { name: "Position", visible: true },
+    { name: "Notes", visible: true }
+  ];
+  let columnsPref = loadColumnPreferences() || defaultColumns;
+
+  // ------------------------------------------------
+  // 2) DOM REFERENCES
+  // ------------------------------------------------
+  const tableHeader = document.getElementById('tableHeader');
+  const tableBody = document.getElementById('tableBody');
+
+  // Pagination & Search
+  const searchInput = document.getElementById('searchInput');
+  const rowsPerPageSelect = document.getElementById('rowsPerPageSelect');
+  const prevPageBtn = document.getElementById('prevPageBtn');
+  const nextPageBtn = document.getElementById('nextPageBtn');
+  const pageInfo = document.getElementById('pageInfo');
+
+  // Column prefs modal
+  const columnPrefsBtn = document.getElementById('columnPrefsBtn');
+  const columnPrefsModal = document.getElementById('columnPrefsModal');
+  const closeModalSpan = columnPrefsModal.querySelector('.close');
+  const savePrefsBtn = document.getElementById('savePrefsBtn');
+  const cancelPrefsBtn = document.getElementById('cancelPrefsBtn');
+  const columnPrefsList = document.getElementById('columnPrefsList');
+
+  // Save & Cancel
+  const saveBtn = document.getElementById('saveBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+
+  // ------------------------------------------------
+  // 3) BUILD TABLE HEADER
+  // ------------------------------------------------
+  function buildTableHeader() {
+    tableHeader.innerHTML = '';
+    const headerRow = document.createElement('tr');
+
+    // Cell 0: Drag
+    const thDrag = document.createElement('th');
+    thDrag.textContent = 'Drag';
+    headerRow.appendChild(thDrag);
+
+    // Cell 1: Select
+    const thSelect = document.createElement('th');
+    thSelect.textContent = 'Select';
+    headerRow.appendChild(thSelect);
+
+    // Cell 2: Actions
+    const thActions = document.createElement('th');
+    thActions.textContent = 'Actions';
+    headerRow.appendChild(thActions);
+
+    // Cells 3+: data columns
+    columnsPref.forEach(col => {
+      if (col.visible || col.name === "Index") {
+        const th = document.createElement('th');
+        th.textContent = col.name;
+
+        // Right-click -> Bulk Edit
+        th.addEventListener('contextmenu', function(e) {
+          e.preventDefault();
+          const newValue = prompt(`Enter new value for '${col.name}' (bulk edit):`);
+          if (newValue !== null) {
+            applyBulkEditToColumn(col, newValue);
+          }
+        });
+
+        headerRow.appendChild(th);
+      }
+    });
+
+    tableHeader.appendChild(headerRow);
+  }
+
+  // ------------------------------------------------
+  // 4) RIGHT-CLICK BULK EDIT
+  // ------------------------------------------------
+  function applyBulkEditToColumn(col, newValue) {
+    // Find the cell index for this column among visible columns
+    const visibleCols = columnsPref.filter(c => c.visible || c.name === "Index");
+    const colIndex = visibleCols.findIndex(c => c.name === col.name);
+    if (colIndex < 0) return;
+    // Data columns start at cell 3 (after Drag=0, Select=1, Actions=2)
+    const targetCellIndex = colIndex + 3;
+
+    // Update the displayed rows for which the user has checked the checkbox
+    const rows = tableBody.querySelectorAll('tr');
+    rows.forEach(row => {
+      const checkbox = row.cells[1].querySelector('input[type="checkbox"]');
+      if (checkbox && checkbox.checked) {
+        row.cells[targetCellIndex].textContent = newValue;
+        row.classList.add('modified');
+      }
+    });
+  }
+
+  // ------------------------------------------------
+  // 5) SEARCH & FILTER
+  // ------------------------------------------------
+  function getFilteredData() {
+    if (!searchString) {
+      return allData; // no filter
+    }
+    const lowerSearch = searchString.toLowerCase();
+    return allData.filter(row => {
+      // If any field (string) contains the search text
+      return Object.values(row).some(val => {
+        if (typeof val === 'string') {
+          return val.toLowerCase().includes(lowerSearch);
+        }
+        return false;
+      });
+    });
+  }
+
+  // When user types in the search box, update searchString & show page 1
+  searchInput.addEventListener('input', function() {
+    searchString = this.value;
+    currentPage = 1;
+    displayPage();
+  });
+
+  // ------------------------------------------------
+  // 6) PAGINATION
+  // ------------------------------------------------
+  function displayPage() {
+    const filteredData = getFilteredData(); 
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = Math.min(startIndex + rowsPerPage, filteredData.length);
+    const pageData = filteredData.slice(startIndex, endIndex);
+
+    tableBody.innerHTML = '';
+    pageData.forEach((rowData, i) => {
+      const globalIndex = startIndex + i; // position in filteredData
+      const row = document.createElement('tr');
+
+      // Cell 0: Drag handle
+      const tdDrag = document.createElement('td');
+      tdDrag.classList.add('drag-handle');
+      tdDrag.setAttribute('draggable', 'true');
+      tdDrag.textContent = '☰';
+      row.appendChild(tdDrag);
+
+      // Cell 1: Selection checkbox
+      const tdSelect = document.createElement('td');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      tdSelect.appendChild(checkbox);
+      row.appendChild(tdSelect);
+
+      // Cell 2: Actions dropdown
+      const tdActions = document.createElement('td');
+      const selectActions = document.createElement('select');
+
+      // Default option
+      const defaultOpt = document.createElement('option');
+      defaultOpt.value = '';
+      defaultOpt.textContent = 'Select...';
+      selectActions.appendChild(defaultOpt);
+
+      // Action 1
+      const action1 = document.createElement('option');
+      action1.value = 'Action 1';
+      action1.textContent = 'Action 1';
+      selectActions.appendChild(action1);
+
+      // Action 2
+      const action2 = document.createElement('option');
+      action2.value = 'Action 2';
+      action2.textContent = 'Action 2';
+      selectActions.appendChild(action2);
+
+      // Action dropdown change
+      selectActions.addEventListener('change', function() {
+        if (this.value !== '') {
+          alert(`You selected: ${this.value}\nSuccess!`);
+          this.value = '';
+        }
+      });
+
+      tdActions.appendChild(selectActions);
+      row.appendChild(tdActions);
+
+      // Cells 3+: Data columns
+      columnsPref.forEach(col => {
+        if (col.visible || col.name === "Index") {
+          const cell = document.createElement('td');
+          cell.setAttribute('contenteditable', 'true');
+          if (col.name === "Index") {
+            // Show row's position in the filtered set
+            cell.textContent = globalIndex + 1;
+          } else {
+            cell.textContent = rowData[col.name] || '';
+          }
+          cell.addEventListener('input', () => row.classList.add('modified'));
+          row.appendChild(cell);
+        }
+      });
+
+      // Row drag & drop events
+      row.addEventListener('dragover', dragOver);
+      row.addEventListener('dragleave', dragLeave);
+      // We'll pass the entire rowData object so we know which item in allData to reorder
+      row.addEventListener('drop', e => drop(e, rowData));
+
+      tableBody.appendChild(row);
+    });
+
+    attachRowDragEvents();
+    updatePaginationUI(filteredData.length);
+  }
+
+  function updatePaginationUI(totalCount) {
+    const totalPages = Math.ceil(totalCount / rowsPerPage);
+    pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+    prevPageBtn.disabled = (currentPage <= 1);
+    nextPageBtn.disabled = (currentPage >= totalPages);
+  }
+
+  rowsPerPageSelect.addEventListener('change', function() {
+    rowsPerPage = parseInt(this.value, 10);
+    currentPage = 1;
+    displayPage();
+  });
+  prevPageBtn.addEventListener('click', function() {
+    if (currentPage > 1) {
+      syncCurrentPageEdits();
+      currentPage--;
+      displayPage();
+    }
+  });
+  nextPageBtn.addEventListener('click', function() {
+    const filteredData = getFilteredData();
+    const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+    if (currentPage < totalPages) {
+      syncCurrentPageEdits();
+      currentPage++;
+      displayPage();
+    }
+  });
+
+  // Before changing pages or saving, copy user edits from DOM into allData
+  function syncCurrentPageEdits() {
+    const filteredData = getFilteredData();
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const rows = tableBody.querySelectorAll('tr');
+    rows.forEach((row, i) => {
+      const rowData = filteredData[startIndex + i];
+      if (!rowData) return;
+      let cellIndex = 3; // data columns start at cell 3
+      columnsPref.forEach(col => {
+        if (col.visible || col.name === "Index") {
+          if (col.name !== 'Index') {
+            rowData[col.name] = row.cells[cellIndex].textContent;
+          }
+          cellIndex++;
+        }
+      });
+      row.classList.remove('modified');
+    });
+  }
+
+  // ------------------------------------------------
+  // 7) DRAG & DROP REORDERING
+  // ------------------------------------------------
+  let draggedRowElement = null;
+
+  function attachRowDragEvents() {
+    document.querySelectorAll('.drag-handle').forEach(handle => {
+      handle.addEventListener('dragstart', dragStart);
+      handle.addEventListener('dragend', dragEnd);
+    });
+  }
+
+  function dragStart(e) {
+    draggedRowElement = this.parentNode;
+    e.dataTransfer.effectAllowed = 'move';
+  }
+
+  function dragEnd() {
+    draggedRowElement = null;
+    clearDragOver();
+  }
+
+  function dragOver(e) {
+    e.preventDefault();
+    this.classList.add('drag-over');
+  }
+
+  function dragLeave() {
+    this.classList.remove('drag-over');
+  }
+
+  // Reorder allData by removing the dragged row and inserting it before/after the target
+  function drop(e, targetRowObj) {
+    e.preventDefault();
+    this.classList.remove('drag-over');
+    if (!draggedRowElement || draggedRowElement === this) return;
+
+    // Identify which row in allData is being dragged
+    // We'll parse the "Index" cell from the dragged row or store rowData
+    // For simplicity, parse from cell 3 (if columns haven't changed order).
+    const draggedIndexCell = draggedRowElement.cells[3];
+    if (!draggedIndexCell) return;
+    const draggedIndex = parseInt(draggedIndexCell.textContent) - 1;
+    const draggedObj = getFilteredData()[draggedIndex];
+    if (!draggedObj) return;
+
+    // Reorder in the global allData
+    const fromPos = allData.indexOf(draggedObj);
+    const toPos = allData.indexOf(targetRowObj);
+    if (fromPos < 0 || toPos < 0) return;
+
+    const rect = this.getBoundingClientRect();
+    const offset = e.clientY - rect.top;
+    const dropAbove = offset < rect.height / 2;
+
+    allData.splice(fromPos, 1);
+    let insertPos = dropAbove ? toPos : toPos + 1;
+    if (fromPos < toPos) insertPos--;
+    if (insertPos < 0) insertPos = 0;
+    if (insertPos > allData.length) insertPos = allData.length;
+    allData.splice(insertPos, 0, draggedObj);
+
+    displayPage();
+  }
+
+  function clearDragOver() {
+    document.querySelectorAll('tr').forEach(row => row.classList.remove('drag-over'));
+  }
+
+  // ------------------------------------------------
+  // 8) SAVE & CANCEL
+  // ------------------------------------------------
+  saveBtn.addEventListener('click', saveChanges);
+  cancelBtn.addEventListener('click', cancelChanges);
+
+  function saveChanges() {
+    // Sync the current page's edits to allData
+    syncCurrentPageEdits();
+    // Send allData to the server
+    fetch('/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(allData)
+    })
+    .then(res => res.json())
+    .then(result => {
+      if (result.status !== 'success') {
+        alert("Error saving data: " + result.message);
+      }
+    })
+    .catch(err => alert("Error: " + err));
+  }
+
+  function cancelChanges() {
+    // Discard unsaved changes on current page
+    displayPage();
+  }
+
+  // ------------------------------------------------
+  // 9) COLUMN PREFERENCES
+  // ------------------------------------------------
+  columnPrefsBtn.addEventListener('click', openColumnPrefsModal);
+  closeModalSpan.addEventListener('click', closeColumnPrefsModal);
+  cancelPrefsBtn.addEventListener('click', closeColumnPrefsModal);
+  savePrefsBtn.addEventListener('click', saveColumnPrefs);
+
+  function openColumnPrefsModal() {
+    columnPrefsList.innerHTML = '';
+    columnsPref.forEach(col => {
+      const li = document.createElement('li');
+      li.classList.add('pref-item');
+      li.setAttribute('draggable', 'true');
+      li.setAttribute('data-col', col.name);
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      if (col.name === "Index") {
+        checkbox.checked = true;
+        checkbox.disabled = true;
+      } else {
+        checkbox.checked = col.visible;
+      }
+      li.appendChild(checkbox);
+
+      const label = document.createElement('span');
+      label.textContent = col.name;
+      li.appendChild(label);
+
+      const dragIndicator = document.createElement('span');
+      dragIndicator.textContent = ' ☰';
+      li.appendChild(dragIndicator);
+
+      columnPrefsList.appendChild(li);
+    });
+    addModalDragAndDrop();
+    columnPrefsModal.style.display = 'block';
+  }
+
+  function closeColumnPrefsModal() {
+    columnPrefsModal.style.display = 'none';
+  }
+
+  function saveColumnPrefs() {
+    const newPrefs = [];
+    const items = columnPrefsList.querySelectorAll('li');
+    items.forEach(item => {
+      const colName = item.getAttribute('data-col');
+      const visible = item.querySelector('input[type="checkbox"]').checked;
+      newPrefs.push({ name: colName, visible: visible });
+    });
+    // Force Index always visible
+    newPrefs.forEach(pref => {
+      if (pref.name === "Index") pref.visible = true;
+    });
+    columnsPref = newPrefs;
+    saveColumnPreferences(columnsPref);
+    buildTableHeader();
+    displayPage();
+    closeColumnPrefsModal();
+  }
+
+  function addModalDragAndDrop() {
+    let draggedItem = null;
+    columnPrefsList.querySelectorAll('li').forEach(item => {
+      item.addEventListener('dragstart', function(e) {
+        draggedItem = this;
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      item.addEventListener('dragover', function(e) {
+        e.preventDefault();
+      });
+      item.addEventListener('drop', function(e) {
+        e.preventDefault();
+        if (draggedItem && draggedItem !== this) {
+          const items = Array.from(columnPrefsList.children);
+          const draggedIndex = items.indexOf(draggedItem);
+          const targetIndex = items.indexOf(this);
+          if (draggedIndex < targetIndex) {
+            columnPrefsList.insertBefore(draggedItem, this.nextSibling);
+          } else {
+            columnPrefsList.insertBefore(draggedItem, this);
+          }
+        }
+      });
+    });
+  }
+
+  // ------------------------------------------------
+  // 10) LOCAL STORAGE FOR COLUMN PREFS
+  // ------------------------------------------------
+  function loadColumnPreferences() {
+    const prefs = localStorage.getItem('columnPreferences');
+    return prefs ? JSON.parse(prefs) : null;
+  }
+  function saveColumnPreferences(prefs) {
+    localStorage.setItem('columnPreferences', JSON.stringify(prefs));
+  }
+
+  // ------------------------------------------------
+  // 11) INITIAL SETUP
+  // ------------------------------------------------
+  buildTableHeader();
+
+  // Load data from /data
+  Promise.resolve(inlineData)
+    .then(res => res.json())
+    .then(data => {
+      allData = data;
+      displayPage(); // Show the first page
+    })
+    .catch(err => console.error('Error loading data:', err));
+});
+
+</script>
+</body>
+</html>
