@@ -4,7 +4,26 @@ body {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color: #2E2E2E;
   margin: 0;
-  padding: 20px;
+  padding: 0; /* We'll add padding around #tableContainer if needed */
+}
+
+/* Sticky Top Bar at the top of the browser window */
+#topBar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: #F2FBF7;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+  /* No margin-bottom so it doesn't push table down unexpectedly */
+}
+
+/* Scrollable container for the table */
+#tableContainer {
+  position: relative; 
+  max-height: 90vh;  /* or any desired height to allow scrolling */
+  overflow-y: auto;  /* vertical scroll for the table */
+  padding: 20px;     /* optional padding around the table */
 }
 
 /* Table Styling */
@@ -13,11 +32,19 @@ table {
   width: 100%;
   background: #FFFFFF;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
   border-radius: 8px;
-  overflow: hidden;
+  /* Remove any overflow here to allow sticky header to work inside container */
 }
 
+/* Sticky table header cells inside the container */
+thead th {
+  position: sticky;
+  top: 0;  /* pinned at top of #tableContainer */
+  z-index: 999;
+  background-color: #36C69F; /* your teal header color */
+}
+
+/* Table cells */
 th, td {
   border: 1px solid #dddddd;
   padding: 12px 15px;
@@ -36,9 +63,10 @@ tr {
 }
 
 tr:hover {
-  background-color: #E8F7F3;  /* Lighter teal for better contrast */
+  background-color: #E8F7F3; /* Lighter teal for better contrast */
 }
 
+/* Drag handle styling */
 .drag-handle {
   cursor: grab;
   width: 30px;
@@ -115,7 +143,7 @@ select:focus {
 .modal {
   display: none;
   position: fixed;
-  z-index: 1000;
+  z-index: 2000;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
@@ -141,29 +169,18 @@ select:focus {
   color: #555;
 }
 
-/* Checkbox in Header */
-#selectAllCheckbox {
-  cursor: pointer;
-  transform: scale(1.2);
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
-  body {
+  #tableContainer {
     padding: 10px;
   }
-
   table {
     font-size: 12px;
   }
-
   th, td {
     padding: 10px;
   }
-
   button {
     padding: 6px 10px;
   }
 }
-
-

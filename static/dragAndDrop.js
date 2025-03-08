@@ -42,29 +42,27 @@ function dragEnd() {
  * @param {DragEvent} e
  */
 function autoScroll(e) {
-  const scrollThreshold = 50;        // distance from top/bottom edge
-  const scrollSpeed = 8;            // how many pixels to scroll each event
+  const container = document.getElementById('tableContainer');
+  const scrollThreshold = 50;  // px from top/bottom edge
+  const scrollSpeed = 8;       // px to scroll per event
 
-  // Current mouse Y position relative to the viewport
+  const rect = container.getBoundingClientRect();
   const mouseY = e.clientY;
-  const viewportHeight = window.innerHeight;
 
-  // If near the top, scroll up
-  if (mouseY < scrollThreshold) {
-    window.scrollBy(0, -scrollSpeed);
+  // If mouse is near the top of container
+  if (mouseY < rect.top + scrollThreshold) {
+    container.scrollTop -= scrollSpeed;
   }
-  // If near the bottom, scroll down
-  else if (mouseY > viewportHeight - scrollThreshold) {
-    window.scrollBy(0, scrollSpeed);
+  // If mouse is near the bottom of container
+  else if (mouseY > rect.bottom - scrollThreshold) {
+    container.scrollTop += scrollSpeed;
   }
 }
 
 function dragOver(e) {
   e.preventDefault();
   e.currentTarget.classList.add('drag-over');
-
-  // Attempt to auto-scroll if near top/bottom
-  autoScroll(e);
+  autoScroll(e); // call container-based scroll
 }
 
 function dragLeave(e) {

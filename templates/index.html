@@ -7,9 +7,8 @@
 </head>
 <body>
 
-  <!-- Your top bar, search, pagination, etc. -->
-  <div id="topBar" style="margin-bottom: 10px;">
-    <!-- Example controls or placeholders -->
+  <!-- Top bar pinned at top of the browser window -->
+  <div id="topBar">
     <input type="text" id="searchInput" placeholder="Search...">
     <select id="rowsPerPageSelect">
       <option value="20" selected>20</option>
@@ -24,11 +23,13 @@
     <button id="columnPrefsBtn">Columns</button>
   </div>
 
-  <!-- Table -->
-  <table>
-    <thead id="tableHeader"></thead>
-    <tbody id="tableBody"></tbody>
-  </table>
+  <!-- Scrollable container for the table -->
+  <div id="tableContainer">
+    <table>
+      <thead id="tableHeader"></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
 
   <!-- Column Preferences Modal -->
   <div id="columnPrefsModal" class="modal">
