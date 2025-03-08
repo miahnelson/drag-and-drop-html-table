@@ -1,4 +1,4 @@
-# Draggable Flask Table Project
+# Drag and Drop HTML Table using Flask
 
 This is a Flask-based project demonstrating a draggable table with pagination, bulk editing, column preferences, fallback data, and sticky headers. It also supports a sticky top bar for better usability.
 
