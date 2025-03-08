@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
   // --- Column Preferences ---
-  // Define default columns (order and visibility).
   const defaultColumns = [
     {name: "Index", visible: true},
     {name: "Name", visible: true},
@@ -33,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const cancelPrefsBtn = document.getElementById('cancelPrefsBtn');
   const columnPrefsList = document.getElementById('columnPrefsList');
 
-  // --- Build Table Header based on column preferences ---
+  // --- Build Table Header ---
   function buildTableHeader() {
     tableHeader.innerHTML = '';
     const headerRow = document.createElement('tr');
@@ -44,9 +43,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const thSelect = document.createElement('th');
     thSelect.textContent = 'Select';
     headerRow.appendChild(thSelect);
-    // Data columns (only those marked visible) in order per preferences
+    // Data columns: Force "Index" visible even if deselected
     columnsPref.forEach(col => {
-      if (col.visible) {
+      if (col.visible || col.name === "Index") {
         const th = document.createElement('th');
         th.textContent = col.name;
         headerRow.appendChild(th);
@@ -75,22 +74,24 @@ document.addEventListener('DOMContentLoaded', function() {
           checkbox.type = 'checkbox';
           tdSelect.appendChild(checkbox);
           row.appendChild(tdSelect);
-          // Data columns based on column preferences (only visible ones)
+          // Data cells: only for columns where visible === true, or "Index"
           columnsPref.forEach(col => {
-            const cell = document.createElement('td');
-            cell.setAttribute('contenteditable', 'true');
-            if (col.name === "Index") {
-              // Always override with current row order; updateIndices() will fix this.
-              cell.textContent = i + 1;
-            } else {
-              cell.textContent = rowData[col.name] || '';
+            if (col.visible || col.name === "Index") {
+              const cell = document.createElement('td');
+              cell.setAttribute('contenteditable', 'true');
+              if (col.name === "Index") {
+                // Override with current row order; updateIndices() will refresh this.
+                cell.textContent = i + 1;
+              } else {
+                cell.textContent = rowData[col.name] || '';
+              }
+              cell.addEventListener('input', function() {
+                row.classList.add('modified');
+              });
+              row.appendChild(cell);
             }
-            cell.addEventListener('input', function() {
-              row.classList.add('modified');
-            });
-            row.appendChild(cell);
           });
-          // Attach row drag & drop events
+          // Attach drag & drop events to the row
           row.addEventListener('dragover', dragOver);
           row.addEventListener('dragleave', dragLeave);
           row.addEventListener('drop', drop);
@@ -144,22 +145,13 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('tr').forEach(row => row.classList.remove('drag-over'));
   }
 
-  // --- Update Index Column ---
+  // --- Update the "Index" Column ---
   function updateIndices() {
-    // Determine position (cell index) of "Index" column among visible columns.
-    let visibleIndex = 0;
-    columnsPref.forEach(col => {
-      if (col.visible && col.name === "Index") {
-        // visibleIndex is the zero-based position among visible columns.
-      } else if (col.visible) {
-        visibleIndex++;
-      }
-    });
-    // Alternatively, scan visible columns:
-    const visibleCols = columnsPref.filter(col => col.visible);
+    // Determine the visible order of columns and locate "Index"
+    const visibleCols = columnsPref.filter(col => col.visible || col.name === "Index");
     const indexPos = visibleCols.findIndex(col => col.name === "Index");
     if (indexPos === -1) return;
-    // The data cells start at offset 2 (after drag and select).
+    // Data cells start at offset 2 (after drag and select)
     const targetCellIndex = indexPos + 2;
     const rows = tableBody.querySelectorAll('tr');
     rows.forEach((row, i) => {
@@ -170,16 +162,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // --- Save and Cancel Table Changes ---
+  // --- Save and Cancel Changes ---
   function saveChanges() {
     const rows = tableBody.querySelectorAll('tr');
     const newData = [];
     rows.forEach(row => {
       let rowObj = {};
-      // Data cells start at index 2.
-      let cellIndex = 2;
+      let cellIndex = 2; // Data cells start after drag and select
       columnsPref.forEach(col => {
-        if (col.visible) {
+        if (col.visible || col.name === "Index") {
           rowObj[col.name] = row.cells[cellIndex].textContent;
           cellIndex++;
         }
@@ -208,11 +199,11 @@ document.addEventListener('DOMContentLoaded', function() {
   function applyBulkEdit() {
     const bulkKey = document.getElementById('bulkColumn').value;
     const bulkValue = document.getElementById('bulkValue').value;
-    // Find the cell index for bulkKey in the visible columns
-    const visibleCols = columnsPref.filter(col => col.visible);
+    // Find the target cell index among visible columns
+    const visibleCols = columnsPref.filter(col => col.visible || col.name === "Index");
     const colIndex = visibleCols.findIndex(col => col.name === bulkKey);
     if (colIndex < 0) return;
-    const targetCellIndex = colIndex + 2; // offset for drag and select cells
+    const targetCellIndex = colIndex + 2; // Offset for drag and select cells
     const rows = tableBody.querySelectorAll('tr');
     rows.forEach(row => {
       const checkbox = row.cells[1].querySelector('input[type="checkbox"]');
@@ -228,13 +219,16 @@ document.addEventListener('DOMContentLoaded', function() {
   closeModalSpan.addEventListener('click', closeColumnPrefsModal);
   cancelPrefsBtn.addEventListener('click', closeColumnPrefsModal);
   savePrefsBtn.addEventListener('click', function() {
-    // Read new preferences from the modal list
     const newPrefs = [];
     const items = columnPrefsList.querySelectorAll('li');
     items.forEach(item => {
       const colName = item.getAttribute('data-col');
       const visible = item.querySelector('input[type="checkbox"]').checked;
       newPrefs.push({ name: colName, visible: visible });
+    });
+    // Force "Index" to always be visible.
+    newPrefs.forEach(pref => {
+      if (pref.name === "Index") pref.visible = true;
     });
     columnsPref = newPrefs;
     saveColumnPreferences(columnsPref);
@@ -244,23 +238,24 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   function openColumnPrefsModal() {
-    // Build modal list from current columnsPref
     columnPrefsList.innerHTML = '';
     columnsPref.forEach(col => {
       const li = document.createElement('li');
       li.classList.add('pref-item');
       li.setAttribute('draggable', 'true');
       li.setAttribute('data-col', col.name);
-      // Checkbox for visibility
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
-      checkbox.checked = col.visible;
+      if (col.name === "Index") {
+        checkbox.checked = true;
+        checkbox.disabled = true;
+      } else {
+        checkbox.checked = col.visible;
+      }
       li.appendChild(checkbox);
-      // Label for column name
       const label = document.createElement('span');
       label.textContent = col.name;
       li.appendChild(label);
-      // Drag handle indicator
       const dragIndicator = document.createElement('span');
       dragIndicator.textContent = ' ☰';
       li.appendChild(dragIndicator);
@@ -269,12 +264,9 @@ document.addEventListener('DOMContentLoaded', function() {
     addModalDragAndDrop();
     columnPrefsModal.style.display = 'block';
   }
-
   function closeColumnPrefsModal() {
     columnPrefsModal.style.display = 'none';
   }
-
-  // Enable simple drag & drop reordering in the modal list
   function addModalDragAndDrop() {
     let draggedItem = null;
     columnPrefsList.querySelectorAll('li').forEach(item => {
@@ -304,8 +296,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // --- Local Storage Helpers ---
   function loadColumnPreferences() {
     const prefs = localStorage.getItem('columnPreferences');
-    if (prefs) return JSON.parse(prefs);
-    return null;
+    return prefs ? JSON.parse(prefs) : null;
   }
   function saveColumnPreferences(prefs) {
     localStorage.setItem('columnPreferences', JSON.stringify(prefs));
