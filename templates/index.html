@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Editable & Draggable Table</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div id="tableControls" style="text-align: right; margin-bottom: 10px;">
+    <button id="saveBtn">Save</button>
+    <button id="cancelBtn">Cancel</button>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Drag</th>
+        <th>Col1</th>
+        <th>Col2</th>
+        <th>Col3</th>
+        <th>Col4</th>
+        <th>Col5</th>
+        <th>Col6</th>
+        <th>Col7</th>
+        <th>Col8</th>
+        <th>Col9</th>
+        <th>Col10</th>
+        <th>Col11</th>
+        <th>Col12</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      <!-- Table rows will be injected by script.js -->
+    </tbody>
+  </table>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
