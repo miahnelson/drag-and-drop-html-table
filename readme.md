@@ -31,6 +31,9 @@ This is a Flask-based project demonstrating a draggable table with pagination, b
 
 ---
 
+## Live version hosted on GitHub pages 
+- https://miahnelson.github.io/drag-and-drop-html-table/
+
 ## Requirements
 
 - **Python 3.7+**
