@@ -12,10 +12,10 @@ def index():
 @app.route('/data')
 def data():
     """
-    Return JSON data from static/data.json if it exists.
+    Return JSON data from data.json if it exists.
     Otherwise, return 404 so the client uses fallback data.
     """
-    data_path = os.path.join(app.static_folder, 'data.json')
+    data_path = 'data.json'
     if os.path.exists(data_path):
         with open(data_path, 'r', encoding='utf-8') as f:
             return jsonify(json.load(f))
@@ -28,7 +28,7 @@ def save():
     If you want to save changes back to data.json, implement here.
     Otherwise, you can omit this route or leave as is.
     """
-    data_path = os.path.join(app.static_folder, 'data.json')
+    data_path = 'data.json'
     new_data = request.get_json()
     try:
         with open(data_path, 'w', encoding='utf-8') as f:

@@ -5,7 +5,7 @@ html_file = os.path.join("templates", "index.html")
 css_file = os.path.join("static", "style.css")
 script_file = os.path.join("static", "script.js")
 dnd_file = os.path.join("static", "dragAndDrop.js")
-output_file = "static_index.html"
+output_file = os.path.join("docs", "index.html") 
 
 # 1. Check files exist
 for f in [html_file, css_file, script_file, dnd_file]:

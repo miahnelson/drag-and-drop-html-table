@@ -14,6 +14,20 @@
     "Zip": "10001"
   },
   {
+    "Address": "101 Maple St",
+    "City": "CHicago",
+    "Company": "Delta Co.",
+    "Country": "USA",
+    "Email": "robert.brown@example.com",
+    "Index": 4,
+    "Name": "Robert Brown",
+    "Notes": "N/A",
+    "Phone": "555-0104",
+    "Position": "Analyst",
+    "State": "OK",
+    "Zip": "77001"
+  },
+  {
     "Address": "456 Oak Ave",
     "City": "Los Angeles",
     "Company": "Beta Corp",
@@ -42,18 +56,18 @@
     "Zip": "28202"
   },
   {
-    "Address": "101 Maple St",
-    "City": "CHicago",
-    "Company": "Delta Co.",
+    "Address": "789 Pine Rd",
+    "City": "Chicago",
+    "Company": "Zeta LLC",
     "Country": "USA",
-    "Email": "robert.brown@example.com",
-    "Index": 4,
-    "Name": "Robert Brown",
+    "Email": "alice.johnson@example.com",
+    "Index": 6,
+    "Name": "Alice Johnson",
     "Notes": "N/A",
-    "Phone": "555-0104",
-    "Position": "Analyst",
+    "Phone": "555-0103",
+    "Position": "Designer",
     "State": "OK",
-    "Zip": "77001"
+    "Zip": "60601"
   },
   {
     "Address": "707 Aspen Dr",
@@ -68,20 +82,6 @@
     "Position": "Manager",
     "State": "OK",
     "Zip": "95101"
-  },
-  {
-    "Address": "789 Pine Rd",
-    "City": "Chicago",
-    "Company": "Zeta LLC",
-    "Country": "USA",
-    "Email": "alice.johnson@example.com",
-    "Index": 6,
-    "Name": "Alice Johnson",
-    "Notes": "N/A",
-    "Phone": "555-0103",
-    "Position": "Designer",
-    "State": "OK",
-    "Zip": "60601"
   },
   {
     "Address": "303 Cedar Rd",
